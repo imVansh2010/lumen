@@ -1,0 +1,779 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ==========================================================================
+   LUMEN — global theme
+   (Story setting: the sky city of Lumen.)
+   Navy base, white text, red reserved for glitch & danger.
+   ========================================================================== */
+
+@layer base {
+  :root {
+    color-scheme: dark;
+    --navy-950: #050b1a;
+    --navy-900: #081127;
+    --navy-800: #0c1b39;
+    --navy-700: #12264c;
+    --red: #ef4444;
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    @apply m-0 bg-navy-950 font-body text-white/90 antialiased;
+    background-image:
+      radial-gradient(1200px 600px at 78% -10%, rgba(36, 70, 127, 0.35), transparent 62%),
+      radial-gradient(900px 520px at 12% 108%, rgba(18, 38, 76, 0.55), transparent 60%);
+    background-attachment: fixed;
+    /* `clip` rather than `hidden`: hidden would turn the body into its own
+       scroll container and stop the marketing page scrolling normally. */
+    overflow-x: clip;
+  }
+
+  /* Big, friendly default click target sizing for kids */
+  button {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  ::selection {
+    background: rgba(239, 68, 68, 0.5);
+    color: #fff;
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: rgba(8, 17, 39, 0.7);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(36, 70, 127, 0.7);
+    border-radius: 999px;
+    border: 2px solid rgba(5, 11, 26, 0.9);
+  }
+}
+
+@layer components {
+  /* ---- Subtle CRT scan sweep keeps the "talking computer" feel ---- */
+  .scanlines::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 70;
+    background: repeating-linear-gradient(
+      0deg,
+      rgba(255, 255, 255, 0.025) 0px,
+      rgba(255, 255, 255, 0.025) 1px,
+      transparent 1px,
+      transparent 4px
+    );
+    mix-blend-mode: overlay;
+  }
+
+  /* ---- Glitch text (used when Echo confuses herself) ---- */
+  .glitch-text {
+    position: relative;
+    display: inline-block;
+  }
+  .glitch-text::before,
+  .glitch-text::after {
+    content: attr(data-text);
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    pointer-events: none;
+    white-space: pre-wrap;
+  }
+  .glitch-text::before {
+    color: #9cc8ff;
+    transform: translate(-2px, 0);
+    animation: lumen-glitch-shift 2.6s steps(1) infinite;
+  }
+  .glitch-text::after {
+    color: #ef4444;
+    transform: translate(2px, 0);
+    animation: lumen-glitch-shift 2.2s steps(1) infinite reverse;
+  }
+
+  /* ---- Buttons ---- */
+  .btn {
+    @apply relative inline-flex select-none items-center justify-center gap-2 rounded-2xl px-6 py-3 font-display text-lg font-bold tracking-wide transition-all duration-200 focus:outline-none focus-visible:ring-4 focus-visible:ring-white/40 disabled:cursor-not-allowed disabled:opacity-40;
+  }
+  .btn-primary {
+    @apply border-2 border-white/70 bg-white text-navy-950;
+    box-shadow: 0 0 14px rgba(255, 255, 255, 0.2);
+    /* Only animate the two cheap, GPU-friendly properties so the glow eases in
+       smoothly instead of snapping on after hover. */
+    transition:
+      transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 280ms ease-out;
+    will-change: transform, box-shadow;
+  }
+  .btn-primary:hover:not(:disabled) {
+    transform: translateY(-1px) scale(1.015);
+    box-shadow:
+      0 0 18px rgba(255, 255, 255, 0.32),
+      0 0 40px rgba(156, 200, 255, 0.18);
+  }
+  .btn-danger {
+    @apply border-2 border-danger-500/80 bg-danger-600/20 text-white;
+  }
+  .btn-danger:hover:not(:disabled) {
+    @apply bg-danger-600/40;
+    box-shadow: 0 0 26px rgba(239, 68, 68, 0.55);
+  }
+  .btn-ghost {
+    @apply border-2 border-white/20 bg-white/5 text-white/80;
+  }
+  .btn-ghost:hover:not(:disabled) {
+    @apply border-white/50 bg-white/10 text-white;
+  }
+
+  /* ---- Title screen: Echo floating high above the wordmark ---- */
+  .title-echo {
+    top: max(5.25rem, 11vh);
+    transform: translateX(-50%);
+  }
+
+  /* ---- Panels ---- */
+  .panel {
+    @apply rounded-3xl border-2 border-white/10 bg-navy-900/80 backdrop-blur-md;
+  }
+
+  /* ---- Dialogue box ----------------------------------------------------
+     The trainer's own line gets a visible outline and a slightly bigger box.
+     These are plain classes rather than conditional utilities because two
+     Tailwind utilities that set the same property are resolved by stylesheet
+     order, not by class order — so the "bigger" variant would never win. */
+  .dialogue-box {
+    @apply panel mx-auto w-full max-w-[58rem] px-5 pb-4 pt-3 shadow-[0_10px_50px_rgba(0,0,0,0.5)] sm:px-9 sm:pb-5 sm:pt-3.5;
+  }
+  /* The Trainer's own line: outlined, and a touch bigger. */
+  .dialogue-box--trainer {
+    @apply max-w-[62rem] border-white/60 bg-navy-900/90 px-6 pb-5 pt-4 sm:px-10 sm:pb-6 sm:pt-5;
+    box-shadow:
+      0 0 0 3px rgba(255, 255, 255, 0.28),
+      0 10px 50px rgba(0, 0, 0, 0.5);
+  }
+  .dialogue-speaker {
+    @apply text-lg sm:text-xl;
+  }
+  .dialogue-box--trainer .dialogue-speaker {
+    @apply text-xl sm:text-2xl;
+  }
+  .dialogue-line {
+    @apply mt-0.5 min-h-[3.25rem] text-xl sm:text-[1.6rem];
+  }
+  .dialogue-box--trainer .dialogue-line {
+    @apply min-h-[3.5rem] text-[1.35rem] sm:text-[1.75rem];
+  }
+
+  .typewriter-caret {
+    display: inline-block;
+    width: 0.6ch;
+    margin-left: 2px;
+    background: currentColor;
+    animation: lumen-caret 1s steps(1) infinite;
+    transform: translateY(2px);
+  }
+}
+
+/* Short windows: pull Echo up and shrink it so it clears the wordmark. */
+@media (max-height: 760px) {
+  .title-echo {
+    top: 3.75rem;
+    transform: translateX(-50%) scale(0.82);
+    transform-origin: top center;
+  }
+}
+
+/* Small phones: keep Echo and Bolt side by side without clipping. */
+@media (max-width: 460px) {
+  .cast-row {
+    transform: scale(0.78);
+  }
+}
+
+/* Short laptop / landscape windows: shrink the cast so the location chip, the
+   power grid and the characters never collide. */
+@media (max-height: 720px) {
+  .cast-row {
+    transform: scale(0.72);
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  .no-taps {
+    touch-action: manipulation;
+  }
+}
+
+/* ==========================================================================
+   Keyframes for scene effects
+   ========================================================================== */
+
+@keyframes lumen-caret {
+  0%,
+  50% {
+    opacity: 1;
+  }
+  50.01%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes lumen-glitch-shift {
+  0%,
+  84%,
+  100% {
+    opacity: 0;
+    clip-path: inset(0 0 0 0);
+  }
+  85% {
+    opacity: 0.85;
+    clip-path: inset(8% 0 58% 0);
+  }
+  89% {
+    opacity: 0.85;
+    clip-path: inset(62% 0 6% 0);
+  }
+  93% {
+    opacity: 0.85;
+    clip-path: inset(28% 0 44% 0);
+  }
+  97% {
+    opacity: 0.7;
+    clip-path: inset(74% 0 2% 0);
+  }
+}
+
+/* Clouds drift across the sky at different speeds */
+@keyframes drift {
+  from {
+    transform: translateX(-12%);
+  }
+  to {
+    transform: translateX(112%);
+  }
+}
+
+/* Aurora ribbons sway behind the skyline */
+@keyframes aurora-sway {
+  0%,
+  100% {
+    transform: translateX(-5%) skewX(-8deg) scaleY(1);
+    opacity: 0.5;
+  }
+  50% {
+    transform: translateX(5%) skewX(7deg) scaleY(1.18);
+    opacity: 0.85;
+  }
+}
+
+/* A shooting star streaks across the sky */
+@keyframes shoot {
+  0% {
+    transform: translate(0, 0) rotate(20deg);
+    opacity: 0;
+  }
+  4% {
+    opacity: 1;
+  }
+  18% {
+    transform: translate(-420px, 150px) rotate(20deg);
+    opacity: 0;
+  }
+  100% {
+    transform: translate(-420px, 150px) rotate(20deg);
+    opacity: 0;
+  }
+}
+
+/* City windows twinkle */
+@keyframes twinkle {
+  0%,
+  100% {
+    opacity: 0.25;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Upload cards arc up into Echo's orb */
+@keyframes card-rise {
+  0% {
+    opacity: 0;
+    transform: translate(var(--x0), 40px) rotate(var(--r0)) scale(0.7);
+  }
+  15% {
+    opacity: 1;
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--x1), -250px) rotate(var(--r1)) scale(0.35);
+  }
+}
+
+/* Bad-data cards flip over to reveal the problem */
+@keyframes card-flip {
+  0% {
+    transform: rotateY(0deg);
+  }
+  100% {
+    transform: rotateY(180deg);
+  }
+}
+
+/* Bolt bobs, blinks and waves */
+@keyframes bolt-bob {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-1deg);
+  }
+  50% {
+    transform: translateY(-8px) rotate(1deg);
+  }
+}
+@keyframes bolt-blink {
+  0%,
+  92%,
+  100% {
+    transform: scaleY(1);
+  }
+  95% {
+    transform: scaleY(0.08);
+  }
+}
+@keyframes bolt-wave {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(-32deg);
+  }
+  50% {
+    transform: rotate(-8deg);
+  }
+  75% {
+    transform: rotate(-34deg);
+  }
+}
+
+/* Power grid: spark travels a live wire, then dies */
+@keyframes grid-spark {
+  from {
+    stroke-dashoffset: 340;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes grid-fade {
+  to {
+    opacity: 0;
+  }
+}
+/* A district holds its charge, surges once, then fizzles out for good. */
+@keyframes district-cut {
+  0% {
+    filter: brightness(1);
+  }
+  10% {
+    filter: brightness(2.1) saturate(1.5);
+  }
+  18% {
+    filter: brightness(0.3);
+  }
+  26% {
+    filter: brightness(1.85) saturate(1.3);
+  }
+  34% {
+    filter: brightness(0.45);
+  }
+  44% {
+    filter: brightness(1.25);
+  }
+  100% {
+    filter: grayscale(0.85) brightness(0.42);
+  }
+}
+
+@keyframes district-dim {
+  0% {
+    filter: none;
+    opacity: 1;
+  }
+  40% {
+    transform: scale(0.96);
+  }
+  100% {
+    filter: grayscale(1) brightness(0.45);
+    opacity: 0.5;
+    transform: scale(0.96);
+  }
+}
+@keyframes district-relight {
+  0% {
+    filter: grayscale(1) brightness(0.45);
+    opacity: 0.5;
+    transform: scale(0.96);
+  }
+  100% {
+    filter: none;
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Red alert pulse for the chaos */
+@keyframes alert-pulse {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 0.55;
+  }
+}
+
+/* Power-down ripple over the whole stage */
+@keyframes blackout {
+  to {
+    opacity: 1;
+  }
+}
+
+/* A district powers down, left to right, one light at a time */
+@keyframes bulb-on {
+  0% {
+    opacity: 0.15;
+    transform: scale(0.5);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.3);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes bulb-off {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  25% {
+    opacity: 1;
+    transform: scale(1.35);
+    filter: brightness(1.6);
+  }
+  100% {
+    opacity: 0.2;
+    transform: scale(0.85);
+    filter: none;
+  }
+}
+
+/* Whole towers dim out during the blackout sweep */
+@keyframes tower-dark {
+  to {
+    opacity: 0.22;
+    filter: brightness(0.32) saturate(0.5);
+  }
+}
+
+/* The moment a district comes back to life */
+@keyframes lit-burst {
+  0% {
+    opacity: 0.85;
+    transform: scale(0.35);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(2.4);
+  }
+}
+@keyframes lit-ring {
+  0% {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  40% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.9);
+  }
+}
+
+/* A new beat slides in instead of cutting hard — easier to follow */
+@keyframes scene-in {
+  from {
+    opacity: 0;
+    transform: scale(1.03);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Hover-lane traffic drifts across the city */
+@keyframes lane-run {
+  from {
+    transform: translateX(-90px);
+  }
+  to {
+    transform: translateX(2090px);
+  }
+}
+
+/* Dashed lane lights crawl forward */
+@keyframes lane-dash {
+  to {
+    stroke-dashoffset: -200;
+  }
+}
+
+/* The lights flicker twice, then the whole city goes dark */
+@keyframes blackout-flash {
+  0% {
+    opacity: 0;
+  }
+  7% {
+    opacity: 0.9;
+  }
+  20% {
+    opacity: 0.08;
+  }
+  32% {
+    opacity: 0.6;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* Red alert banner drops in above the bad uploads */
+@keyframes banner-drop {
+  0% {
+    opacity: 0;
+    transform: translateY(-22px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Bad upload cards jitter about, so they feel broken */
+@keyframes card-jitter {
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  25% {
+    transform: translate(-2px, 1px) rotate(-0.8deg);
+  }
+  75% {
+    transform: translate(2px, -1px) rotate(0.8deg);
+  }
+}
+
+/* Red scan sweep across the confused city */
+@keyframes scan-sweep {
+  0% {
+    opacity: 0;
+    transform: translateY(-6%);
+  }
+  35% {
+    opacity: 0.45;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(105%);
+  }
+}
+
+/* Confetti pieces tumble down at the festival */
+@keyframes confetti-fall {
+  0% {
+    opacity: 0;
+    transform: translateY(-40px) rotate(0deg);
+  }
+  12% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(420px) rotate(var(--spin));
+  }
+}
+
+/* --------------------------------- Sorting Yard --------------------------- */
+
+/* The conveyor belt rolls under the picture */
+@keyframes belt-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-40px);
+  }
+}
+
+/* A new picture drops onto the belt */
+@keyframes belt-drop {
+  0% {
+    opacity: 0;
+    transform: translateY(-30px) scale(0.88);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(4px) scale(1.02);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* A star pops when Bolt learns something new */
+@keyframes star-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.4) rotate(-25deg);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.3) rotate(8deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+/* A gentle "not quite" wobble instead of a harsh flash */
+@keyframes nope {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-7px);
+  }
+  40% {
+    transform: translateX(7px);
+  }
+  60% {
+    transform: translateX(-4px);
+  }
+  80% {
+    transform: translateX(4px);
+  }
+}
+
+/* Card flips over to show what Bolt actually learned */
+@keyframes flip-in {
+  0% {
+    opacity: 0;
+    transform: rotateX(-70deg);
+  }
+  100% {
+    opacity: 1;
+    transform: rotateX(0deg);
+  }
+}
+
+/* ==========================================================================
+   Site → game warp (falling into the city)
+   ========================================================================== */
+
+/* A speed line travelling outwards from the centre of the screen. */
+@keyframes warp-streak {
+  0% {
+    transform: translateX(4vmax) scaleX(0.32);
+    opacity: 0;
+  }
+  12% {
+    opacity: 1;
+  }
+  78% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(125vmax) scaleX(1.05);
+    opacity: 0;
+  }
+}
+
+/* The whole field of lines zooms, so the fall keeps accelerating. */
+@keyframes warp-zoom {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.7);
+  }
+}
+
+/* The bright point at the centre of the tunnel we are falling towards. */
+@keyframes warp-core {
+  0% {
+    transform: translate(-50%, -50%) scale(0.1);
+    opacity: 0;
+  }
+  30% {
+    opacity: 0.75;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(5);
+    opacity: 0;
+  }
+}
+
+/* Final white-out as we arrive in the game. */
+@keyframes warp-flash {
+  0%,
+  58% {
+    opacity: 0;
+  }
+  80% {
+    opacity: 0.75;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+  .scanlines::before {
+    display: none;
+  }
+}
