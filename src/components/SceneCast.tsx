@@ -80,11 +80,12 @@ export default function SceneCast({
         />
         {/* The workbench Bolt stands on. Its lit top edge sits just below his
             feet and the front falls away into shadow, so it reads as a bench
-            under him rather than a high ledge he is stranded on. It is tall
-            enough that the characters read as standing up high on it. */}
+            under him rather than a high ledge he is stranded on. It runs deep
+            enough that, however high the cast is lifted, the bench still
+            reaches down to the floor instead of hovering above it. */}
         {roomScene && (
           <span
-            className="pointer-events-none absolute left-1/2 top-[calc(100%_-_14px)] h-40 w-[min(88vw,40rem)] -translate-x-1/2 rounded-t-xl"
+            className="pointer-events-none absolute left-1/2 top-[calc(100%_-_14px)] h-64 w-[min(88vw,40rem)] -translate-x-1/2 rounded-t-xl"
             style={{
               background:
                 'linear-gradient(to bottom, #1B3A70 0%, #16305E 9%, #0C1B39 42%, #081127 80%, rgba(5,11,26,0) 100%)',
