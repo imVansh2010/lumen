@@ -6,6 +6,8 @@ import Confetti from './visuals/Confetti'
 interface Props {
   visual: VisualKey
   fx: BeatFx[]
+  /** Current beat id — drives the progressive bad-card reveal. */
+  beatId: string
 }
 
 /** A tiny lit skyline seen through the workshop window. */
@@ -126,7 +128,7 @@ function RoomBackdrop({ windowLit = false }: { windowLit?: boolean }) {
   )
 }
 
-export default function SceneLayers({ visual, fx }: Props) {
+export default function SceneLayers({ visual, fx, beatId }: Props) {
   const cityScene =
     visual === 'city' || visual === 'festival' || visual === 'chaos' || visual === 'blackout'
   // The beat that kills the power keeps the city lit so it can go dark district by district.
@@ -148,7 +150,7 @@ export default function SceneLayers({ visual, fx }: Props) {
           {fx.includes('confetti') && <Confetti />}
         </>
       )}
-      {visual === 'chaos' && <ChaosStorm alert={fx.includes('alert')} />}
+      {visual === 'chaos' && <ChaosStorm beatId={beatId} />}
       {visual === 'blackout' && !shuttingDown && (
         <div
           className="absolute inset-0 bg-navy-950/70"

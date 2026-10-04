@@ -6,17 +6,6 @@ interface HappyCard {
   left: number
   delay: number
 }
-interface BadCard {
-  emoji: string
-  caption: string
-  /** Horizontal position in percent — cards are spread across the full width. */
-  left: number
-  top: number
-  delay: number
-  code?: boolean
-  /** Busy screens hide the two least important cards on narrow displays. */
-  smallScreenOptional?: boolean
-}
 
 const HAPPY: HappyCard[] = [
   { emoji: '📷', label: 'photo', left: 8, delay: 0 },
@@ -27,18 +16,6 @@ const HAPPY: HappyCard[] = [
   { emoji: '🎨', label: 'art', left: 70, delay: 0.9 },
   { emoji: '🚲', label: 'bike', left: 83, delay: 1.6 },
   { emoji: '🍰', label: 'cake', left: 92, delay: 0.7 },
-]
-
-/* Seven cards, evenly spread from the far left to the far right so the chaos
-   fills the whole stage instead of bunching up in one corner. */
-const BAD: BadCard[] = [
-  { emoji: '👾', caption: 'labeled “cupcake”', left: 10, top: 22, delay: 0 },
-  { emoji: '🐱✈️', caption: '“cats can fly!”', left: 23, top: 40, delay: 0.28 },
-  { emoji: '📣', caption: '"DO IT NOW!!"', left: 36.5, top: 44, delay: 0.56 },
-  { emoji: '⚡', caption: 'wrong answer!', left: 50, top: 36, delay: 0.84 },
-  { emoji: '🍰', caption: '“cake is a monster”', left: 63.5, top: 42, delay: 1.12 },
-  { emoji: '🌪️', caption: 'a tall tale', left: 77, top: 39, delay: 1.4, smallScreenOptional: true },
-  { emoji: '🔑', caption: 'ACCESS CODE 7X-9Q-4', left: 90, top: 23, delay: 1.68, code: true },
 ]
 
 export function UploadStorm() {
@@ -71,7 +48,44 @@ export function UploadStorm() {
   )
 }
 
-export function ChaosStorm({ alert = false }: { alert?: boolean }) {
+interface BadCard {
+  emoji: string
+  /** The wrong (but believable) tag or confident claim Echo picked up. */
+  caption: string
+  /** Static hand-placed tilt so the pile feels messy without any looping motion. */
+  rot: number
+  code?: boolean
+}
+
+/* Seven pieces of bad training data. They are deliberately NOT absurd — each is
+   a *near-miss* label (a wolf tagged "a friendly husky") or a confident claim
+   with no proof behind it ("cats can fly — trust me"). Spotting why each one is
+   bad takes real comparison, not just "that's silly".
+
+   The array order matches the REVEAL map below, so cards appear in the same
+   order the story names them. */
+const BAD: BadCard[] = [
+  { emoji: '🐺', caption: 'tagged “a friendly husky”', rot: -2.5 },
+  { emoji: '🦇', caption: 'tagged “a little bird”', rot: 2 },
+  { emoji: '🐱✈️', caption: '“cats can fly — trust me”', rot: -1.5 },
+  { emoji: '📣', caption: '“DO IT NOW!!”', rot: 2.5 },
+  { emoji: '🔑', caption: 'ACCESS CODE 7X-9Q-4', rot: -1, code: true },
+  { emoji: '🍄', caption: 'tagged “a plant”', rot: 1.5 },
+  { emoji: '🌪️', caption: '“everyone says so!”', rot: -2 },
+]
+
+/** How many cards are visible from each chaos beat onward. Cards pop in exactly
+    when the story mentions them instead of all at once. */
+const REVEAL: Record<string, number> = {
+  'c3-1': 2,
+  'c3-2': 4,
+  'c3-3': 5,
+  'c3-4': BAD.length,
+}
+
+export function ChaosStorm({ beatId }: { beatId: string }) {
+  const shown = BAD.slice(0, REVEAL[beatId] ?? BAD.length)
+
   return (
     <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
       {/* red alert pulse */}
@@ -91,51 +105,33 @@ export function ChaosStorm({ alert = false }: { alert?: boolean }) {
         }}
       />
 
-      {alert && (
-        <div className="absolute inset-x-0 top-[7%] flex justify-center px-4">
-          <div
-            className="flex items-center gap-2 rounded-full border-2 border-danger-500 bg-danger-600/40 px-5 py-2 font-display text-sm font-extrabold uppercase tracking-widest text-white shadow-glow-red sm:text-base"
-            style={{
-              animation:
-                'banner-drop 0.5s ease-out both, alert-pulse 1.6s ease-in-out 0.5s infinite',
-            }}
-          >
-            <span className="text-lg">🚨</span> Bad data uploaded
-            <span className="text-lg">🚨</span>
-          </div>
-        </div>
-      )}
-
-      {/* cards are centred on their `left` anchor so they spread evenly */}
-      {BAD.map((c, i) => (
-        <div
-          key={i}
-          className={`absolute w-28 -translate-x-1/2 sm:w-44 ${c.smallScreenOptional ? 'hidden sm:block' : ''}`}
-          style={{ left: `${c.left}%`, top: `${c.top}%` }}
-        >
-          <div
-            className={`rounded-2xl border-2 px-3 py-3 text-center ${
-              c.code
-                ? 'border-danger-500 bg-danger-600/30 shadow-glow-red'
-                : 'border-danger-500/60 bg-navy-800/90'
-            }`}
-            style={{
-              animation: `pop-in 0.4s ease-out ${c.delay}s both, card-jitter 0.6s ease-in-out ${
-                c.delay + 0.4
-              }s infinite`,
-            }}
-          >
-            <div className="text-2xl sm:text-3xl">{c.emoji}</div>
-            <div
-              className={`mt-1 text-[0.6875rem] font-bold leading-tight sm:text-xs ${
-                c.code ? 'font-mono tracking-wider text-danger-400' : 'text-white/85'
-              }`}
-            >
-              {c.caption}
+      {/* Cards sit in a wrapping flex row so they can never overlap, at any width.
+          The tilt lives on the outer box and the entrance scale on the inner one,
+          so the pop-in animation doesn't wipe out the hand-placed rotation. */}
+      <div className="absolute inset-x-0 top-[28%] flex flex-wrap items-start justify-evenly gap-2 px-3 sm:top-[30%] sm:gap-3 sm:px-8">
+        {shown.map((c, i) => (
+          <div key={i} style={{ transform: `rotate(${c.rot}deg)` }}>
+            <div className="animate-pop-in" style={{ animationDelay: `${(i % 3) * 0.08}s` }}>
+              <div
+                className={`w-24 rounded-2xl border-2 px-2 py-2 text-center sm:w-32 sm:px-3 ${
+                  c.code
+                    ? 'border-danger-500 bg-danger-600/30 shadow-glow-red'
+                    : 'border-danger-500/60 bg-navy-800/90'
+                }`}
+              >
+                <div className="text-xl sm:text-2xl">{c.emoji}</div>
+                <div
+                  className={`mt-1 text-[0.625rem] font-bold leading-tight sm:text-xs ${
+                    c.code ? 'font-mono tracking-wider text-danger-400' : 'text-white/85'
+                  }`}
+                >
+                  {c.caption}
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   )
 }

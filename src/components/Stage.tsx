@@ -114,13 +114,17 @@ export default function Stage({
       onClick={advance}
       role="presentation"
     >
-      {/* Scene */}
+      {/* Scene. Keyed by the scene, not the beat: re-keying on every dialogue
+          line remounted the whole backdrop and made every bad-data card replay
+          its entrance animation each time the narrator spoke. Keying by `visual`
+          lets the scene hold still across beats, so cards only pop in when the
+          story first mentions them (see ChaosStorm's REVEAL map). */}
       <div
-        key={beat.id}
+        key={beat.visual}
         className={`absolute inset-0 ${shake ? 'animate-shake' : ''}`}
         style={reduced ? undefined : { animation: 'scene-in 0.6s ease-out both' }}
       >
-        <SceneLayers visual={beat.visual} fx={beat.fx ?? []} />
+        <SceneLayers visual={beat.visual} fx={beat.fx ?? []} beatId={beat.id} />
       </div>
 
       {/* Soft darkening so dialogue stays readable over bright scenes */}
