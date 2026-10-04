@@ -372,21 +372,21 @@ function Aurora() {
 /* A shooting star: a glowing head drags a fading tail along its path.
    `dx`/`dy` are in vw so the fall is proportional at every viewport, and the
    angle is derived from them so the streak always lies exactly along its
-   direction of travel — head leading, tail behind. */
+   direction of travel — head leading, tail behind. Each star streaks once
+   when it is spawned; ShootingStars unmounts it afterwards. */
 function ShootingStar({
   top,
   left,
   dx,
   dy,
   duration,
-  delay,
 }: {
   top: string
   left: string
   dx: number
   dy: number
+  /** Seconds the streak takes to cross the sky. */
   duration: number
-  delay: number
 }) {
   const angle = (Math.atan2(dy, dx) * 180) / Math.PI
   return (
@@ -396,7 +396,7 @@ function ShootingStar({
         {
           top,
           left,
-          animation: `shoot ${duration}s linear ${delay}s infinite`,
+          animation: `shoot ${duration}s linear forwards`,
           '--dx': `${dx}vw`,
           '--dy': `${dy}vw`,
         } as CSSProperties
@@ -420,6 +420,74 @@ function ShootingStar({
         />
       </span>
     </div>
+  )
+}
+
+/* One randomly thrown star: born in an outer quarter of the sky and sent
+   only *further outwards* — so it can never cross the centre column where
+   Echo floats on the title screen, or where the cast stands on stage. */
+function makeShot(id: number) {
+  const fromLeft = Math.random() < 0.5
+  const duration = 1.4 + Math.random() * 1.4
+  return {
+    id,
+    top: `${2 + Math.random() * 18}%`,
+    left: fromLeft ? `${2 + Math.random() * 28}%` : `${70 + Math.random() * 28}%`,
+    dx: (fromLeft ? -1 : 1) * (16 + Math.random() * 10),
+    dy: 8 + Math.random() * 7,
+    duration,
+    /** Unmount just past the end of the streak — it is invisible by then. */
+    removeAfter: duration * 1000 + 400,
+  }
+}
+
+/* Shooting stars on a random schedule: every few seconds a star is born at a
+   fresh spot, streaks once, and is removed. Nothing loops, so the sky never
+   repeats the same pattern. */
+function ShootingStars() {
+  const [shots, setShots] = useState<ReturnType<typeof makeShot>[]>([])
+
+  useEffect(() => {
+    let nextId = 0
+    const timers = new Set<number>()
+
+    const schedule = (gapMs: number) => {
+      timers.add(
+        window.setTimeout(() => {
+          const shot = makeShot(nextId++)
+          setShots((s) => [...s, shot])
+          timers.add(
+            window.setTimeout(() => {
+              setShots((s) => s.filter((x) => x.id !== shot.id))
+            }, shot.removeAfter),
+          )
+          // Often enough to catch one, rare enough that each still feels
+          // like a small event.
+          schedule(4000 + Math.random() * 6000)
+        }, gapMs),
+      )
+    }
+    // The first one shows up quickly, but never at a fixed moment.
+    schedule(2000 + Math.random() * 4000)
+
+    return () => {
+      for (const t of timers) window.clearTimeout(t)
+    }
+  }, [])
+
+  return (
+    <>
+      {shots.map((s) => (
+        <ShootingStar
+          key={s.id}
+          top={s.top}
+          left={s.left}
+          dx={s.dx}
+          dy={s.dy}
+          duration={s.duration}
+        />
+      ))}
+    </>
   )
 }
 
@@ -563,15 +631,9 @@ export default function SkyCity({
 
       {/* Aurora */}
       <Aurora />
-      {/* Shooting stars, spread across the outer quarters of the sky and each
-          travelling only *further outwards* — so none of them can ever cross
-          the centre column where Echo floats on the title screen, or where the
-          cast stands on stage. Left pair falls down-left, right pair falls
-          down-right, with different origins, angles, lengths and rhythms. */}
-      <ShootingStar top="5%" left="14%" dx={-24} dy={9} duration={15} delay={2.5} />
-      <ShootingStar top="15%" left="4%" dx={-18} dy={12} duration={19} delay={9} />
-      <ShootingStar top="4%" left="79%" dx={24} dy={10} duration={13} delay={5.5} />
-      <ShootingStar top="16%" left="86%" dx={16} dy={13} duration={17} delay={12.5} />
+      {/* Shooting stars — see ShootingStars: one every few seconds, at a
+          fresh spot each time. */}
+      <ShootingStars />
 
       {/* Clouds */}
       <Cloud top="24%" scale={1.1} duration={52} delay={0} opacity={0.5} />

@@ -287,20 +287,15 @@
 }
 
 /* A shooting star: fades in, streaks along the vector given by the star's
-   own --dx/--dy custom properties, and is gone — all within the first 14% of
-   its cycle, so the sky is quiet the rest of the time. The flat hold from
-   14%→100% keeps the element parked (and invisible) until the next pass. */
+   own --dx/--dy custom properties, and is gone. Played once per star — the
+   spawner in SkyCity picks a fresh spot and moment for each one. */
 @keyframes shoot {
   0% {
     opacity: 0;
     transform: translate(0, 0);
   }
-  3% {
+  12% {
     opacity: 0.9;
-  }
-  14% {
-    opacity: 0;
-    transform: translate(var(--dx), var(--dy));
   }
   100% {
     opacity: 0;
