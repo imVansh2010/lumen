@@ -32,16 +32,19 @@ export default function TitleScreen({ onPlay, onSkipToStations, sound, onToggleS
 
       <StoryTopBar onSkip={onSkipToStations} sound={sound} onToggleSound={onToggleSound} />
 
-      {/* Echo floats high over the city, centred above the wordmark */}
-      <div className="title-echo pointer-events-none absolute left-1/2 z-20">
-        <div className="animate-float-slow">
-          <EchoOrb mood="happy" size={124} />
-        </div>
-      </div>
-
-      {/* Text block sits dead-centre between the top and bottom of the page */}
+      {/* Text block sits dead-centre between the top and bottom of the page.
+          Echo is the first item *in* the column rather than absolutely pinned
+          above it: a fixed `top` let the centred column climb into her on
+          shorter windows, and as flow content she scales with the root
+          font-size and can never overlap the wordmark. */}
       <div className="relative z-20 grid h-full w-full place-items-center px-6 text-center">
         <div className="flex flex-col items-center">
+          <div className="title-echo pointer-events-none">
+            <div className="animate-float-slow">
+              <EchoOrb mood="happy" size="7.75rem" />
+            </div>
+          </div>
+
           <h1
             className="animate-pop-in bg-gradient-to-b from-white via-white to-glow bg-clip-text font-body text-[clamp(3.25rem,13vw,7.5rem)] font-black leading-none tracking-[0.05em] text-transparent"
             style={{ filter: 'drop-shadow(0 4px 24px rgba(156,200,255,0.45))' }}

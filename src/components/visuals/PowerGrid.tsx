@@ -117,7 +117,7 @@ export default function PowerGrid({
                 <Bulbs lit={lit} />
               </div>
               <div
-                className={`text-[10px] font-bold uppercase tracking-widest ${
+                className={`text-[0.625rem] font-bold uppercase tracking-widest ${
                   online ? 'text-glow' : lit > 0 ? 'text-white/70' : 'text-white/45'
                 }`}
               >

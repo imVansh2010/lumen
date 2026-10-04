@@ -2,7 +2,8 @@ import type { Mood } from '../../story/types'
 
 interface Props {
   mood?: Mood
-  size?: number
+  /** px number or a CSS length (use rem so Bolt follows the global scale). */
+  size?: number | string
   waving?: boolean
   className?: string
 }
@@ -83,7 +84,10 @@ export default function Bolt({
   return (
     <div
       className={`relative ${className}`}
-      style={{ width: size, height: size * 1.2 }}
+      style={{
+        width: size,
+        height: typeof size === 'number' ? size * 1.2 : `calc(${size} * 1.2)`,
+      }}
       aria-hidden
     >
       <svg

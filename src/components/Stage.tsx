@@ -134,10 +134,15 @@ export default function Stage({
           That bottom padding is what keeps Bolt centred in the free space
           instead of pinned to the bottom band: 50vh less the height of the
           dialogue band lands him on the middle of that space at any window
-          height, and the clamp takes over on very short windows. */}
+          height, and the clamp takes over on very short windows. The band
+          height is written in rem (16.5rem = the old 264px at the 16px
+          reference root) so it keeps tracking the band as the global scale
+          shrinks both together. */}
       <div
         className={`relative z-20 flex min-h-0 flex-1 justify-center px-4 pt-20 sm:pt-24 ${
-          floorScene ? 'items-end pb-[clamp(3.5rem,calc(50vh_-_264px),40rem)]' : 'items-start pb-4'
+          floorScene
+            ? 'items-end pb-[clamp(3.5rem,calc(50vh_-_16.5rem),40rem)]'
+            : 'items-start pb-4'
         }`}
       >
         <SceneCast

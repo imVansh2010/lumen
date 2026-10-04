@@ -61,7 +61,9 @@ export function UploadStorm() {
         >
           <div className="flex w-20 flex-col items-center gap-1 rounded-2xl border-2 border-white/30 bg-white/10 px-3 py-3 backdrop-blur-sm">
             <span className="text-2xl">{c.emoji}</span>
-            <span className="text-[10px] uppercase tracking-widest text-white/70">{c.label}</span>
+            <span className="text-[0.625rem] uppercase tracking-widest text-white/70">
+              {c.label}
+            </span>
           </div>
         </div>
       ))}
@@ -125,7 +127,7 @@ export function ChaosStorm({ alert = false }: { alert?: boolean }) {
           >
             <div className="text-2xl sm:text-3xl">{c.emoji}</div>
             <div
-              className={`mt-1 text-[11px] font-bold leading-tight sm:text-xs ${
+              className={`mt-1 text-[0.6875rem] font-bold leading-tight sm:text-xs ${
                 c.code ? 'font-mono tracking-wider text-danger-400' : 'text-white/85'
               }`}
             >

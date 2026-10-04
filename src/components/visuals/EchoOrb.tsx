@@ -2,7 +2,8 @@ import type { Mood } from '../../story/types'
 
 interface Props {
   mood?: Mood
-  size?: number
+  /** px number or a CSS length (use rem so the orb follows the global scale). */
+  size?: number | string
   className?: string
 }
 

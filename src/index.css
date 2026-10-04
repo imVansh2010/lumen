@@ -18,6 +18,18 @@
     --red: #ef4444;
   }
 
+  /* One scale factor for the whole game. The design reference is 1440×900
+     with a 16px root, so `1rem` tracks BOTH viewport axes: every rem-based
+     size (text, spacing, character sizes, dialogue box) occupies the same
+     fraction of the screen on any window, which keeps the layout identical
+     from a 4K monitor down to a phone. Capped at 16px so large monitors keep
+     exactly the look they had, and floored at 12px so type never gets
+     unreadably small on narrow screens (below the floor the regular
+     responsive breakpoints take over). */
+  html {
+    font-size: clamp(12px, min(1.1111vw, 1.7778vh), 16px);
+  }
+
   html,
   body,
   #root {
@@ -136,10 +148,15 @@
     @apply border-white/50 bg-white/10 text-white;
   }
 
-  /* ---- Title screen: Echo floating high above the wordmark ---- */
+  /* ---- Title screen: Echo floats directly above the wordmark ----
+     She lives *in* the centred text column rather than pinned to a fixed
+     `top`: a fixed offset collides with the wordmark whenever the window
+     gets shorter (the centred column climbs while she stays put). In flow
+     she scales and moves with the column, so the gap can never close.
+     The class also serves as the hook `useSkylineFit` measures her bottom
+     edge from, so the skyline knows exactly how much room to leave. */
   .title-echo {
-    top: max(5.25rem, 11vh);
-    transform: translateX(-50%);
+    margin-bottom: 1rem;
   }
 
   /* ---- Panels ---- */
@@ -185,27 +202,15 @@
   }
 }
 
-/* Short windows: pull Echo up and shrink it so it clears the wordmark. */
-@media (max-height: 760px) {
-  .title-echo {
-    top: 3.75rem;
-    transform: translateX(-50%) scale(0.82);
-    transform-origin: top center;
-  }
-}
-
-/* Small phones: keep Echo and Bolt side by side without clipping. */
-@media (max-width: 460px) {
-  .cast-row {
-    transform: scale(0.78);
-  }
-}
-
-/* Short laptop / landscape windows: shrink the cast so the location chip, the
-   power grid and the characters never collide. */
+/* Short laptop / landscape windows: the root font-size rule already shrinks
+   the cast with the window (it tracks both axes), so this only needs a light
+   extra squeeze to keep the location chip, the power grid and the characters
+   from colliding. Small phones used to need their own width-based rule too —
+   the root rule now handles them, since it floors at a size where Echo and
+   Bolt fit side by side without clipping. */
 @media (max-height: 720px) {
   .cast-row {
-    transform: scale(0.72);
+    transform: scale(0.9);
   }
 }
 
@@ -281,22 +286,25 @@
   }
 }
 
-/* A shooting star streaks across the sky */
+/* A shooting star: fades in, streaks along the vector given by the star's
+   own --dx/--dy custom properties, and is gone — all within the first 14% of
+   its cycle, so the sky is quiet the rest of the time. The flat hold from
+   14%→100% keeps the element parked (and invisible) until the next pass. */
 @keyframes shoot {
   0% {
-    transform: translate(0, 0) rotate(20deg);
     opacity: 0;
+    transform: translate(0, 0);
   }
-  4% {
-    opacity: 1;
+  3% {
+    opacity: 0.9;
   }
-  18% {
-    transform: translate(-420px, 150px) rotate(20deg);
+  14% {
     opacity: 0;
+    transform: translate(var(--dx), var(--dy));
   }
   100% {
-    transform: translate(-420px, 150px) rotate(20deg);
     opacity: 0;
+    transform: translate(var(--dx), var(--dy));
   }
 }
 

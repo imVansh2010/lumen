@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import type { CSSProperties } from 'react'
 import { cutSeconds, districtAt } from '../../game/blackout'
 
 /* Deterministic pseudo-random so the skyline is stable between renders. */
@@ -19,10 +20,7 @@ const VIEW_H = 560
 /** Where the street sits in that camera — every layer grounds on this line. */
 const BASELINE = 545
 /** Ceiling for the near skyline: tallest point of a tower, roof gear included. */
-const NEAR_H_MAX = 370
-
-/* Neon palette for the rooftop signs dotted across downtown. */
-const SIGN_COLORS = ['#9CC8FF', '#FFB3C7', '#FFE08A', '#8BE0C8']
+const NEAR_H_MAX = 420
 
 interface Light {
   x: number
@@ -36,13 +34,6 @@ interface Tank {
   w: number
   h: number
 }
-interface Sign {
-  x: number
-  y: number
-  w: number
-  h: number
-  color: string
-}
 interface Tower {
   x: number
   w: number
@@ -52,8 +43,6 @@ interface Tower {
   lights: Light[]
   /** Rooftop water tanks and vents, so the skyline reads as a lived-in city. */
   tanks: Tank[]
-  /** An illuminated sign on some downtown towers. */
-  sign?: Sign
 }
 
 interface LayerOptions {
@@ -67,6 +56,12 @@ interface LayerOptions {
   gapMax: number
   /** Chance that a grid slot gets a lit window. */
   density: number
+  /**
+   * Shape of the height distribution: heights run `hMin + (budget-hMin) *
+   * rand()^spreadPow`, so `E[rand^p] = 1/(p+1)`. Lower p pushes the mass up
+   * (taller average skyline); 1.25 leans short, 1 is flat-uniform.
+   */
+  spreadPow?: number
 }
 
 function buildLayer({
@@ -79,8 +74,19 @@ function buildLayer({
   gapMin,
   gapMax,
   density,
+  spreadPow = 1.25,
 }: LayerOptions): Tower[] {
+  /* Two independent streams. The structure stream draws exactly three times
+     per tower — width, roof roll, height roll — so it stays in lockstep no
+     matter what the height parameters are: changing hMin/hMax/spreadPow
+     re-maps the *same* rolls instead of reshuffling every tower downstream.
+     (A single interleaved stream fed window/tank draws between height rolls,
+     so a "make them taller" parameter change re-rolled the whole city — and
+     on the shipped seed the realised average actually fell.) */
   const rand = mulberry32(seed)
+  /* Everything decorative — windows, tanks, delays, gaps — lives on its
+     own stream so its variable draw count can never disturb the structure. */
+  const deco = mulberry32(seed ^ 0x9e3779b9)
   const towers: Tower[] = []
   // Only a sliver of the first and last towers falls outside the frame, so the
   // skyline still bleeds past both edges without lopping a building in half.
@@ -94,15 +100,15 @@ function buildLayer({
 
     // Scattered heights: a real city has towers of every size standing next to
     // each other, so each tower rolls its own height rather than following a
-    // curve that swells in the middle. The lean towards the short end keeps
-    // most of the street low and only a few towers reaching up.
+    // curve that swells in the middle. `spreadPow` shapes the lean (1 = uniform
+    // between the floor and the cap, higher = lean toward the short end).
     // Whatever sits on the roof — spire, antenna, dome, water tanks — is
     // charged against the budget first, so the cap holds down the tower's
     // *highest point* and nothing (a red beacon, a dome) pokes above it.
     const roofExtra =
       roof === 'spire' ? 40 : roof === 'antenna' ? 34 : roof === 'dome' ? Math.round(w / 3) : 26
     const budget = Math.max(hMin, hMax - roofExtra)
-    const spread = Math.pow(rand(), 1.25)
+    const spread = Math.pow(rand(), spreadPow)
     const h = Math.round(hMin + (budget - hMin) * spread)
 
     const lights: Light[] = []
@@ -110,12 +116,12 @@ function buildLayer({
     const rows = Math.max(2, Math.floor(h / 44))
     for (let c = 0; c < cols; c++) {
       for (let r = 0; r < rows; r++) {
-        if (rand() > density) continue
+        if (deco() > density) continue
         lights.push({
           x: x + (c + 0.5) * (w / cols) - 3.5,
           y: baseline - h + (r + 0.55) * (h / rows),
-          delay: rand() * 5,
-          bright: rand() > 0.42,
+          delay: deco() * 5,
+          bright: deco() > 0.42,
         })
       }
     }
@@ -123,10 +129,10 @@ function buildLayer({
     /* Rooftop clutter: a couple of water tanks / vents on the flat roofs. */
     const tanks: Tank[] = []
     if (roof === 'flat') {
-      const count = rand() > 0.5 ? 2 : rand() > 0.2 ? 1 : 0
+      const count = deco() > 0.5 ? 2 : deco() > 0.2 ? 1 : 0
       for (let k = 0; k < count; k++) {
-        const tw = 12 + Math.floor(rand() * 12)
-        const th = 10 + Math.floor(rand() * 16)
+        const tw = 12 + Math.floor(deco() * 12)
+        const th = 10 + Math.floor(deco() * 16)
         tanks.push({
           x: x + ((k + 0.5) * w) / count - tw / 2,
           y: baseline - h - th,
@@ -136,36 +142,18 @@ function buildLayer({
       }
     }
 
-    /* The occasional glowing sign on the face of a tower. */
-    const sign: Sign | undefined =
-      rand() > 0.72
-        ? {
-            x: x + w * 0.16,
-            y: baseline - h + Math.max(16, h * 0.16),
-            w: w * 0.68,
-            h: 24,
-            color: SIGN_COLORS[Math.floor(rand() * SIGN_COLORS.length)],
-          }
-        : undefined
-
-    towers.push({ x, w, h, roof, delay: rand() * 6, lights, tanks, sign })
-    x += w + gapMin + Math.floor(rand() * (gapMax - gapMin))
+    towers.push({ x, w, h, roof, delay: deco() * 6, lights, tanks })
+    x += w + gapMin + Math.floor(deco() * (gapMax - gapMin))
   }
 
   // The first and last towers already start/end outside the frame (see BLEED),
-  // so no gap lands on the edge. Strip their rooftop signs and antennas though:
-  // a glowing sign or red antenna dot sliced by the frame edge reads as a
-  // stray red rectangle, which is exactly the artefact we want gone.
+  // so no gap lands on the edge. Strip their antennas though: a red antenna
+  // dot sliced by the frame edge reads as a stray red rectangle, which is
+  // exactly the artefact we want gone.
   const first = towers[0]
-  if (first) {
-    first.sign = undefined
-    if (first.roof === 'antenna') first.roof = 'flat'
-  }
+  if (first && first.roof === 'antenna') first.roof = 'flat'
   const last = towers[towers.length - 1]
-  if (last) {
-    last.sign = undefined
-    if (last.roof === 'antenna') last.roof = 'flat'
-  }
+  if (last && last.roof === 'antenna') last.roof = 'flat'
 
   return towers
 }
@@ -257,7 +245,7 @@ function Skyline({
                 }
               />
             </>
-          )}
+          )}{' '}
           {detail &&
             t.tanks.map((tk, k) => (
               <rect
@@ -272,47 +260,6 @@ function Skyline({
                 strokeWidth={2}
               />
             ))}
-          {detail && t.sign && (
-            <g
-              style={
-                lightsOn
-                  ? { animation: `twinkle ${4 + t.delay}s ease-in-out ${t.delay}s infinite` }
-                  : undefined
-              }
-            >
-              <rect
-                x={t.sign.x}
-                y={t.sign.y}
-                width={t.sign.w}
-                height={t.sign.h}
-                rx={5}
-                fill="#081127"
-                stroke={t.sign.color}
-                strokeWidth={2}
-                opacity={lightsOn ? 0.95 : 0.4}
-              />
-              <line
-                x1={t.sign.x + 6}
-                y1={t.sign.y + 8}
-                x2={t.sign.x + t.sign.w - 6}
-                y2={t.sign.y + 8}
-                stroke={t.sign.color}
-                strokeWidth={3}
-                strokeLinecap="round"
-                opacity={0.85}
-              />
-              <line
-                x1={t.sign.x + 6}
-                y1={t.sign.y + 16}
-                x2={t.sign.x + t.sign.w * 0.6}
-                y2={t.sign.y + 16}
-                stroke={t.sign.color}
-                strokeWidth={3}
-                strokeLinecap="round"
-                opacity={0.55}
-              />
-            </g>
-          )}
           {t.lights.map((l, j) => (
             <rect
               key={j}
@@ -388,7 +335,7 @@ function Cloud({
         transform: `scale(${scale})`,
         opacity,
         animation: `drift ${duration}s linear ${delay}s infinite`,
-        width: '220px',
+        width: '13.75rem',
       }}
     >
       <div className="relative h-14 w-52">
@@ -422,13 +369,56 @@ function Aurora() {
   )
 }
 
-function ShootingStar({ top, left, delay }: { top: string; left: string; delay: number }) {
+/* A shooting star: a glowing head drags a fading tail along its path.
+   `dx`/`dy` are in vw so the fall is proportional at every viewport, and the
+   angle is derived from them so the streak always lies exactly along its
+   direction of travel — head leading, tail behind. */
+function ShootingStar({
+  top,
+  left,
+  dx,
+  dy,
+  duration,
+  delay,
+}: {
+  top: string
+  left: string
+  dx: number
+  dy: number
+  duration: number
+  delay: number
+}) {
+  const angle = (Math.atan2(dy, dx) * 180) / Math.PI
   return (
-    <div className="pointer-events-none absolute" style={{ top, left }} aria-hidden>
+    <div
+      className="pointer-events-none absolute"
+      style={
+        {
+          top,
+          left,
+          animation: `shoot ${duration}s linear ${delay}s infinite`,
+          '--dx': `${dx}vw`,
+          '--dy': `${dy}vw`,
+        } as CSSProperties
+      }
+      aria-hidden
+    >
       <span
-        className="block h-0.5 w-24 rounded-full bg-gradient-to-r from-transparent via-white to-white"
-        style={{ animation: `shoot 9s ease-in ${delay}s infinite` }}
-      />
+        className="relative block h-[1.5px] w-[clamp(48px,6vw,130px)]"
+        style={{ transform: `rotate(${angle}deg)` }}
+      >
+        <span
+          className="absolute inset-0 rounded-full"
+          style={{
+            background:
+              'linear-gradient(90deg, rgba(156,200,255,0) 0%, rgba(156,200,255,0.6) 55%, rgba(255,255,255,0.95) 100%)',
+          }}
+        />
+        <span
+          className="absolute -right-[3px] top-1/2 h-[5px] w-[5px] -translate-y-1/2 rounded-full bg-white"
+          style={{ boxShadow: '0 0 8px 2px rgba(156,200,255,0.7)' }}
+        />
+      </span>
     </div>
   )
 }
@@ -446,9 +436,16 @@ function useSkylineFit(tallest: number): number {
       const vh = window.innerHeight
       // Height of the tallest rooftop above the bottom of the window, in px.
       const rise = (w / VIEW_W) * (VIEW_H - BASELINE + tallest)
-      // Echo's glow stops about this far down the stage; the short-window rule
-      // shrinks the cast first, so she sits higher there (see index.css).
-      const clearOf = vh <= 720 ? 240 : 320
+      // On the title screen Echo rides inside the centred text column, so her
+      // bottom edge moves with the root font-size and the window height —
+      // measure it instead of guessing a constant: leave room for the orb's
+      // glow (inset −24% + a 40px blur + the float animation, ≈ 60px past the
+      // box) plus a little breathing space — the headroom the old fixed
+      // constant (320px vs Echo's bottom at ≈ 222px) used to give.
+      // Stage screens have no `.title-echo`; they fall back to the old tuned
+      // constants (the cast sits well below them there).
+      const echo = document.querySelector('.title-echo')
+      const clearOf = echo ? echo.getBoundingClientRect().bottom + 80 : vh <= 720 ? 240 : 320
       setFit(Math.min(1, Math.max(0.55, (vh - clearOf) / rise)))
     }
 
@@ -459,6 +456,10 @@ function useSkylineFit(tallest: number): number {
     const observer = new ResizeObserver(measure)
     observer.observe(document.documentElement)
     window.addEventListener('resize', measure)
+    // The web fonts change the height of the centred title column — and with
+    // it Echo's bottom edge — after first paint, so re-measure once the real
+    // fonts are in. Otherwise the clearance is computed against fallback text.
+    document.fonts?.ready.then(measure)
     return () => {
       observer.disconnect()
       window.removeEventListener('resize', measure)
@@ -484,13 +485,14 @@ export default function SkyCity({
         baseline: BASELINE,
         wMin: 34,
         wMax: 78,
-        hMin: 105,
-        hMax: 300,
+        hMin: 125,
+        hMax: 320,
         // Nearly touching so the far layer always backs up a gap in the near
         // skyline — a busy backdrop reads as depth, never as empty sky.
         gapMin: 2,
         gapMax: 5,
         density: 0.5,
+        spreadPow: 1.15,
       }),
     [],
   )
@@ -503,7 +505,7 @@ export default function SkyCity({
         baseline: BASELINE,
         wMin: 46,
         wMax: 118,
-        hMin: 130,
+        hMin: 150,
         // Ceiling for the whole tower, roof gear included. Tall enough to fill
         // the frame on a normal screen; useSkylineFit squashes the block on
         // wide, short windows where the same towers would climb into Echo.
@@ -511,6 +513,11 @@ export default function SkyCity({
         gapMin: 9,
         gapMax: 30,
         density: 0.62,
+        // Uniform roll (p = 1) between the floor and the roof-charged budget:
+        // on the shipped seed it lands the average tower at 292 (was 260 with
+        // the old short-leaning p = 1.25 over a lower range) — visibly taller
+        // on average while low-rise streetfront still stands at hMin.
+        spreadPow: 1,
       }),
     [],
   )
@@ -556,8 +563,15 @@ export default function SkyCity({
 
       {/* Aurora */}
       <Aurora />
-      <ShootingStar top="14%" left="58%" delay={1} />
-      <ShootingStar top="8%" left="82%" delay={6} />
+      {/* Shooting stars, spread across the outer quarters of the sky and each
+          travelling only *further outwards* — so none of them can ever cross
+          the centre column where Echo floats on the title screen, or where the
+          cast stands on stage. Left pair falls down-left, right pair falls
+          down-right, with different origins, angles, lengths and rhythms. */}
+      <ShootingStar top="5%" left="14%" dx={-24} dy={9} duration={15} delay={2.5} />
+      <ShootingStar top="15%" left="4%" dx={-18} dy={12} duration={19} delay={9} />
+      <ShootingStar top="4%" left="79%" dx={24} dy={10} duration={13} delay={5.5} />
+      <ShootingStar top="16%" left="86%" dx={16} dy={13} duration={17} delay={12.5} />
 
       {/* Clouds */}
       <Cloud top="24%" scale={1.1} duration={52} delay={0} opacity={0.5} />

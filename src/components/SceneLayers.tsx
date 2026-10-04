@@ -90,14 +90,14 @@ function RoomBackdrop({ windowLit = false }: { windowLit?: boolean }) {
       <div
         className="absolute left-1/2 top-10 -translate-x-1/2"
         style={{
-          width: 520,
-          height: 520,
+          width: '32.5rem',
+          height: '32.5rem',
           background: 'radial-gradient(circle, rgba(156,200,255,0.15), transparent 66%)',
         }}
       />
 
       {/* round window looking out at the city lights */}
-      <div className="absolute right-[7%] top-[12%] h-[150px] w-[150px] overflow-hidden rounded-full border-4 border-navy-600 bg-navy-950 sm:h-[210px] sm:w-[210px]">
+      <div className="absolute right-[7%] top-[12%] h-[9.375rem] w-[9.375rem] overflow-hidden rounded-full border-4 border-navy-600 bg-navy-950 sm:h-[13.125rem] sm:w-[13.125rem]">
         <div className="absolute inset-0 bg-gradient-to-b from-navy-800 to-navy-950" />
         <div className="absolute inset-0" style={{ animation: 'fade-in 1.4s ease-out both' }}>
           <WindowCity lit={windowLit} />
@@ -107,7 +107,7 @@ function RoomBackdrop({ windowLit = false }: { windowLit?: boolean }) {
       {/* Pegboard mounted flat on the wall. The board used to hang alone in
           the dark, which made it look like it was floating; the soft shadow
           patch behind it anchors it to the wall. */}
-      <div className="absolute left-[6%] top-[30%] w-[120px] sm:w-[150px]">
+      <div className="absolute left-[6%] top-[30%] w-[7.5rem] sm:w-[9.375rem]">
         <div className="absolute -inset-x-4 -inset-y-3 rounded-[28px] bg-navy-950/55 blur-md" />
         <div className="relative rounded-2xl border-2 border-navy-700 bg-navy-900/95 p-3 shadow-[0_18px_44px_rgba(0,0,0,0.65)]">
           <div className="grid grid-cols-3 gap-2">

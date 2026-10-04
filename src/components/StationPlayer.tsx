@@ -88,7 +88,7 @@ function Briefing({
       </h2>
 
       <div className="mt-5 flex flex-col items-center gap-4 rounded-3xl border-2 border-white/10 bg-navy-900/70 p-5 sm:flex-row">
-        <EchoOrb mood="worried" size={92} />
+        <EchoOrb mood="worried" size="5.75rem" />
         <p className="text-center text-lg text-white/85 sm:text-left">
           “Everything I learned today was jumbled and mislabelled. Train Bolt on examples you have
           checked yourself — then he can teach me properly.”
@@ -626,7 +626,7 @@ export default function StationPlayer({ stationId, progress, onBack, onSectionCo
               <span className="mb-2 max-w-[9rem] rounded-2xl border-2 border-white/15 bg-navy-900/80 px-3 py-2 text-center text-sm font-semibold text-white/85">
                 {boltLine}
               </span>
-              <Bolt mood={boltMood} size={104} waving={solved} />
+              <Bolt mood={boltMood} size="6.5rem" waving={solved} />
             </div>
 
             <div className="min-w-0 flex-1">
@@ -776,7 +776,7 @@ export default function StationPlayer({ stationId, progress, onBack, onSectionCo
             <span className="max-w-xs rounded-2xl border-2 border-white/15 bg-navy-900/80 px-3 py-2 text-center text-sm font-semibold text-white/85">
               {boltLine}
             </span>
-            <Bolt mood={boltMood} size={96} waving={solved} />
+            <Bolt mood={boltMood} size="6rem" waving={solved} />
           </div>
         </div>
       </div>

@@ -109,7 +109,7 @@ export default function StationMap({ progress, onOpenStation, onReplayIntro }: P
                       </span>
                       {!unlocked && <IconLock className="h-4 w-4 text-white/40" />}
                       {online && (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-glow/20 px-2 py-0.5 font-display text-[10px] font-bold uppercase tracking-widest text-glow">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-glow/20 px-2 py-0.5 font-display text-[0.625rem] font-bold uppercase tracking-widest text-glow">
                           <IconCheck className="h-3.5 w-3.5" /> Online
                         </span>
                       )}

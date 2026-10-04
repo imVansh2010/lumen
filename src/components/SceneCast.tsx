@@ -58,7 +58,7 @@ export default function SceneCast({
       {/* No border: `border-white/12` is not a Tailwind opacity, so the border
           colour silently fell back to preflight's near-white default and drew a
           thick white ring round the pill. The dark glass fill alone reads fine. */}
-      <span className="relative -top-6 flex items-center rounded-full bg-navy-950/90 px-3.5 py-1.5 text-center font-display text-[11px] font-bold uppercase tracking-[0.18em] text-white/65 shadow-[0_6px_18px_rgba(0,0,0,0.45)] backdrop-blur-sm sm:text-sm">
+      <span className="relative -top-6 flex items-center rounded-full bg-navy-950/90 px-3.5 py-1.5 text-center font-display text-[0.6875rem] font-bold uppercase tracking-[0.18em] text-white/65 shadow-[0_6px_18px_rgba(0,0,0,0.45)] backdrop-blur-sm sm:text-sm">
         {/* `-mr` cancels the trailing letter-spacing so the text sits dead
             centre in the pill and it hugs the text evenly on both sides. */}
         <span className="-mr-[0.18em] whitespace-nowrap">{SCENE_LABELS[visual]}</span>
@@ -75,7 +75,7 @@ export default function SceneCast({
       >
         {/* soft ground shadow keeps the characters planted on screen */}
         <span
-          className="pointer-events-none absolute bottom-[-10px] left-1/2 h-5 w-[70%] max-w-md -translate-x-1/2 rounded-full bg-black/50 blur-lg"
+          className="pointer-events-none absolute bottom-[-0.625rem] left-1/2 h-5 w-[70%] max-w-md -translate-x-1/2 rounded-full bg-black/50 blur-lg"
           aria-hidden
         />
         {/* The workbench Bolt stands on. Its lit top edge sits just below his
@@ -85,7 +85,7 @@ export default function SceneCast({
             reaches down to the floor instead of hovering above it. */}
         {roomScene && (
           <span
-            className="pointer-events-none absolute left-1/2 top-[calc(100%_-_14px)] h-64 w-[min(88vw,40rem)] -translate-x-1/2 rounded-t-xl"
+            className="pointer-events-none absolute left-1/2 top-[calc(100%_-_0.875rem)] h-64 w-[min(88vw,40rem)] -translate-x-1/2 rounded-t-xl"
             style={{
               background:
                 'linear-gradient(to bottom, #1B3A70 0%, #16305E 9%, #0C1B39 42%, #081127 80%, rgba(5,11,26,0) 100%)',
@@ -96,14 +96,14 @@ export default function SceneCast({
         )}
         {showEcho && (
           <CharacterSpot active={echoActive}>
-            <EchoOrb mood={echoMood} size={visual === 'chaos' ? 132 : 122} />
+            <EchoOrb mood={echoMood} size={visual === 'chaos' ? '8.25rem' : '7.625rem'} />
           </CharacterSpot>
         )}
         {showBolt && (
           <CharacterSpot active={boltActive}>
             <Bolt
               mood={boltMood}
-              size={visual === 'plan' || visual === 'map' ? 142 : 152}
+              size={visual === 'plan' || visual === 'map' ? '8.875rem' : '9.5rem'}
               waving={boltActive}
             />
           </CharacterSpot>
