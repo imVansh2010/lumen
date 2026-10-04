@@ -138,7 +138,10 @@ export default function SceneLayers({ visual, fx, beatId }: Props) {
     <div className="absolute inset-0">
       {/* Exactly one background per scene — never two stacked on top of each other. */}
       {cityScene ? (
-        <SkyCity lightsOn={visual !== 'blackout' || shuttingDown} blackout={shuttingDown} />
+        <SkyCity
+          lightsOn={visual !== 'blackout' || shuttingDown}
+          blackout={visual === 'blackout'}
+        />
       ) : (
         <RoomBackdrop windowLit={visual === 'map'} />
       )}

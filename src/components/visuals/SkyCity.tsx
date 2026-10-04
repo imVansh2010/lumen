@@ -28,11 +28,14 @@ interface Light {
   delay: number
   bright: boolean
 }
+/** Rooftop clutter: a water tower, an AC plant or a vent stack. */
+type RooftopKind = 'tank' | 'ac' | 'vent'
 interface Tank {
   x: number
   y: number
   w: number
   h: number
+  kind: RooftopKind
 }
 interface Tower {
   x: number
@@ -111,9 +114,12 @@ function buildLayer({
     const spread = Math.pow(rand(), spreadPow)
     const h = Math.round(hMin + (budget - hMin) * spread)
 
+    /* A dense but cheap window grid: many windows, yet only the `bright` ones
+       animate. Steady windows are static fill, so a fuller facade never costs
+       hundreds of concurrent opacity animations. */
     const lights: Light[] = []
-    const cols = Math.max(2, Math.floor(w / 26))
-    const rows = Math.max(2, Math.floor(h / 44))
+    const cols = Math.max(2, Math.floor(w / 22))
+    const rows = Math.max(2, Math.floor(h / 36))
     for (let c = 0; c < cols; c++) {
       for (let r = 0; r < rows; r++) {
         if (deco() > density) continue
@@ -121,23 +127,27 @@ function buildLayer({
           x: x + (c + 0.5) * (w / cols) - 3.5,
           y: baseline - h + (r + 0.55) * (h / rows),
           delay: deco() * 5,
-          bright: deco() > 0.42,
+          // Keep twinkling windows sparse so the sky stays smooth.
+          bright: deco() > 0.72,
         })
       }
     }
 
-    /* Rooftop clutter: a couple of water tanks / vents on the flat roofs. */
+    /* Rooftop clutter on flat roofs: water towers, AC plants and vent stacks. */
     const tanks: Tank[] = []
     if (roof === 'flat') {
       const count = deco() > 0.5 ? 2 : deco() > 0.2 ? 1 : 0
       for (let k = 0; k < count; k++) {
-        const tw = 12 + Math.floor(deco() * 12)
-        const th = 10 + Math.floor(deco() * 16)
+        const roll = deco()
+        const kind: RooftopKind = roll > 0.66 ? 'tank' : roll > 0.33 ? 'ac' : 'vent'
+        const tw = kind === 'vent' ? 9 + Math.floor(deco() * 5) : 14 + Math.floor(deco() * 14)
+        const th = kind === 'tank' ? 20 + Math.floor(deco() * 12) : kind === 'ac' ? 12 + Math.floor(deco() * 8) : 16 + Math.floor(deco() * 10)
         tanks.push({
           x: x + ((k + 0.5) * w) / count - tw / 2,
           y: baseline - h - th,
           w: tw,
           h: th,
+          kind,
         })
       }
     }
@@ -207,6 +217,17 @@ function Skyline({
             stroke={edge}
             strokeWidth={2}
           />
+          {/* Cornice: a slightly wider band at the top so the roof line reads as
+              architecture instead of a bare rectangle. */}
+          <rect
+            x={t.x - 3}
+            y={baseline - t.h + 2}
+            width={t.w + 6}
+            height={9}
+            rx={4}
+            fill={edge}
+            opacity={0.9}
+          />
           {t.roof === 'spire' && (
             <path
               d={`M${t.x + t.w / 2 - 4} ${baseline - t.h} L${t.x + t.w / 2} ${baseline - t.h - 40} L${
@@ -247,19 +268,101 @@ function Skyline({
             </>
           )}{' '}
           {detail &&
-            t.tanks.map((tk, k) => (
-              <rect
-                key={`tank-${k}`}
-                x={tk.x}
-                y={tk.y}
-                width={tk.w}
-                height={tk.h}
-                rx={3}
-                fill="#0C1B39"
-                stroke={edge}
-                strokeWidth={2}
-              />
-            ))}
+            t.tanks.map((tk, k) => {
+              if (tk.kind === 'tank') {
+                // Water tower: legs, cylinder body and a domed cap.
+                return (
+                  <g key={`tank-${k}`}>
+                    <line
+                      x1={tk.x + 3}
+                      y1={tk.y + tk.h}
+                      x2={tk.x + 3}
+                      y2={baseline - t.h + 4}
+                      stroke={edge}
+                      strokeWidth={2}
+                    />
+                    <line
+                      x1={tk.x + tk.w - 3}
+                      y1={tk.y + tk.h}
+                      x2={tk.x + tk.w - 3}
+                      y2={baseline - t.h + 4}
+                      stroke={edge}
+                      strokeWidth={2}
+                    />
+                    <rect
+                      x={tk.x}
+                      y={tk.y + 4}
+                      width={tk.w}
+                      height={tk.h - 4}
+                      rx={4}
+                      fill="#0C1B39"
+                      stroke={edge}
+                      strokeWidth={2}
+                    />
+                    <path
+                      d={`M${tk.x - 2} ${tk.y + 5} a ${tk.w / 2 + 2} ${tk.w / 2.4} 0 0 1 ${tk.w + 4} 0 Z`}
+                      fill="#12264C"
+                      stroke={edge}
+                      strokeWidth={2}
+                    />
+                  </g>
+                )
+              }
+              if (tk.kind === 'ac') {
+                // AC plant: a squat box with vent louvres.
+                return (
+                  <g key={`tank-${k}`}>
+                    <rect
+                      x={tk.x}
+                      y={tk.y}
+                      width={tk.w}
+                      height={tk.h}
+                      rx={3}
+                      fill="#0C1B39"
+                      stroke={edge}
+                      strokeWidth={2}
+                    />
+                    {[0.3, 0.55, 0.8].map((f, li) => (
+                      <line
+                        key={li}
+                        x1={tk.x + 3}
+                        y1={tk.y + tk.h * f}
+                        x2={tk.x + tk.w - 3}
+                        y2={tk.y + tk.h * f}
+                        stroke={edge}
+                        strokeWidth={1.5}
+                        opacity={0.8}
+                      />
+                    ))}
+                  </g>
+                )
+              }
+              // Vent stack: a thin flue with a small cowl.
+              return (
+                <g key={`tank-${k}`}>
+                  <rect
+                    x={tk.x}
+                    y={tk.y + 4}
+                    width={tk.w}
+                    height={tk.h - 4}
+                    rx={2}
+                    fill="#0C1B39"
+                    stroke={edge}
+                    strokeWidth={2}
+                  />
+                  <rect
+                    x={tk.x - 2}
+                    y={tk.y}
+                    width={tk.w + 4}
+                    height={6}
+                    rx={2}
+                    fill="#12264C"
+                    stroke={edge}
+                    strokeWidth={1.5}
+                  />
+                </g>
+              )
+            })}
           {t.lights.map((l, j) => (
             <rect
               key={j}
@@ -270,7 +373,7 @@ function Skyline({
               rx={2}
               fill={lightsOn ? (l.bright ? '#FFFFFF' : '#9CC8FF') : '#12264C'}
               style={
-                lightsOn
+                lightsOn && l.bright
                   ? { animation: `twinkle ${3 + l.delay / 2}s ease-in-out ${l.delay}s infinite` }
                   : undefined
               }
@@ -316,27 +419,37 @@ function Skyline({
 
 function Cloud({
   top,
+  left,
   scale,
   duration,
   delay,
   opacity,
+  sway,
 }: {
   top: string
+  /** Fixed, evenly-spread anchor so the sky stays balanced. */
+  left: string
   scale: number
   duration: number
   delay: number
   opacity: number
+  /** How far this cloud sways, in px. */
+  sway: number
 }) {
   return (
     <div
-      className="pointer-events-none absolute left-0"
-      style={{
-        top,
-        transform: `scale(${scale})`,
-        opacity,
-        animation: `drift ${duration}s linear ${delay}s infinite`,
-        width: '13.75rem',
-      }}
+      className="pointer-events-none absolute"
+      style={
+        {
+          top,
+          left,
+          transform: `scale(${scale})`,
+          opacity,
+          '--sway': `${sway}px`,
+          animation: `cloud-sway ${duration}s ease-in-out ${delay}s infinite`,
+          width: '13.75rem',
+        } as CSSProperties
+      }
     >
       <div className="relative h-14 w-52">
         <div className="absolute left-0 top-4 h-9 w-24 rounded-full bg-white/10 blur-[6px]" />
@@ -559,7 +672,7 @@ export default function SkyCity({
         // skyline — a busy backdrop reads as depth, never as empty sky.
         gapMin: 2,
         gapMax: 5,
-        density: 0.5,
+        density: 0.44,
         spreadPow: 1.15,
       }),
     [],
@@ -580,7 +693,7 @@ export default function SkyCity({
         hMax: NEAR_H_MAX,
         gapMin: 9,
         gapMax: 30,
-        density: 0.62,
+        density: 0.5,
         // Uniform roll (p = 1) between the floor and the roof-charged budget:
         // on the shipped seed it lands the average tower at 292 (was 260 with
         // the old short-leaning p = 1.25 over a lower range) — visibly taller
@@ -635,11 +748,12 @@ export default function SkyCity({
           fresh spot each time. */}
       <ShootingStars />
 
-      {/* Clouds */}
-      <Cloud top="24%" scale={1.1} duration={52} delay={0} opacity={0.5} />
-      <Cloud top="36%" scale={0.8} duration={68} delay={-14} opacity={0.38} />
-      <Cloud top="44%" scale={1.3} duration={80} delay={-40} opacity={0.32} />
-      <Cloud top="18%" scale={0.65} duration={60} delay={-30} opacity={0.28} />
+      {/* Clouds — evenly spread across the sky, kept to the outer bands so the
+          centre stays clear where Echo and the cast float. */}
+      <Cloud top="22%" left="4%" scale={1.1} duration={52} delay={0} opacity={0.5} sway={30} />
+      <Cloud top="36%" left="20%" scale={0.8} duration={68} delay={-14} opacity={0.38} sway={22} />
+      <Cloud top="16%" left="72%" scale={1.3} duration={80} delay={-40} opacity={0.32} sway={34} />
+      <Cloud top="40%" left="82%" scale={0.65} duration={60} delay={-30} opacity={0.28} sway={18} />
 
       {/* Skyline — the wrapper keeps the authored aspect ratio, so the city is
           never cropped or zoomed past its natural scale. */}

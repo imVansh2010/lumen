@@ -91,7 +91,7 @@ export const BEATS: Beat[] = [
     chapter: 'Bad Examples, Bad Answers',
     visual: 'chaos',
     speaker: 'narrator',
-    text: 'A wolf was tagged “a friendly husky”. A bat was tagged “a little bird”. The labels look almost right — but they are wrong.',
+    text: 'A wolf was tagged “a friendly husky”. The label looks almost right — but it is wrong.',
     fx: ['shake'],
     sfx: 'whoosh',
   },
@@ -118,7 +118,7 @@ export const BEATS: Beat[] = [
     chapter: 'Bad Examples, Bad Answers',
     visual: 'chaos',
     speaker: 'narrator',
-    text: 'A mushroom tagged “a plant”. A claim that “everyone says so”. Bad examples gave Echo bad answers.',
+    text: 'A shout and a secret, treated the same as a fact. Bad examples gave Echo bad answers.',
   },
   {
     id: 'c3-5',

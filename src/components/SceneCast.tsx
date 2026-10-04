@@ -57,8 +57,14 @@ export default function SceneCast({
     <div className="flex w-full flex-col items-center justify-center gap-1 sm:gap-3">
       {/* No border: `border-white/12` is not a Tailwind opacity, so the border
           colour silently fell back to preflight's near-white default and drew a
-          thick white ring round the pill. The dark glass fill alone reads fine. */}
-      <span className="relative -top-6 flex items-center rounded-full bg-navy-950/90 px-3.5 py-1.5 text-center font-display text-[0.6875rem] font-bold uppercase tracking-[0.18em] text-white/65 shadow-[0_6px_18px_rgba(0,0,0,0.45)] backdrop-blur-sm sm:text-sm">
+          thick white ring round the pill. The dark glass fill alone reads fine.
+          In the repair shop the cast sits low on the bench, so the chip rides a
+          little higher to keep clear of it. */}
+      <span
+        className={`relative flex items-center rounded-full bg-navy-950/90 px-3.5 py-1.5 text-center font-display text-[0.6875rem] font-bold uppercase tracking-[0.18em] text-white/65 shadow-[0_6px_18px_rgba(0,0,0,0.45)] backdrop-blur-sm sm:text-sm ${
+          roomScene ? '-top-10' : '-top-6'
+        }`}
+      >
         {/* `-mr` cancels the trailing letter-spacing so the text sits dead
             centre in the pill and it hugs the text evenly on both sides. */}
         <span className="-mr-[0.18em] whitespace-nowrap">{SCENE_LABELS[visual]}</span>
@@ -95,9 +101,14 @@ export default function SceneCast({
           />
         )}
         {showEcho && (
-          <CharacterSpot active={echoActive}>
-            <EchoOrb mood={echoMood} size={visual === 'chaos' ? '8.25rem' : '7.625rem'} />
-          </CharacterSpot>
+          /* In the repair shop Echo hovers over the ledge rather than resting
+             her feet on it — a lift (not margin, which would resize the row)
+             separates her from the bench while Bolt stays planted on it. */
+          <div className={roomScene ? 'translate-y-[-1.75rem]' : ''}>
+            <CharacterSpot active={echoActive}>
+              <EchoOrb mood={echoMood} size={visual === 'chaos' ? '8.25rem' : '7.625rem'} />
+            </CharacterSpot>
+          </div>
         )}
         {showBolt && (
           <CharacterSpot active={boltActive}>

@@ -24,7 +24,7 @@ export function UploadStorm() {
       {HAPPY.map((c, i) => (
         <div
           key={i}
-          className="absolute bottom-[38%]"
+          className="absolute bottom-[38%] will-change-transform"
           style={
             {
               left: `${c.left}%`,
@@ -32,13 +32,19 @@ export function UploadStorm() {
               '--x1': '-20px',
               '--r0': '-12deg',
               '--r1': '16deg',
-              animation: `card-rise 3.4s ease-in ${c.delay}s infinite`,
+              // `both` holds the 0% frame during the delay so a card is hidden
+              // (not frozen visible) until its turn; ease-in-out removes the
+              // dead-feeling slow start of the old ease-in.
+              animation: `card-rise 3.4s ease-in-out ${c.delay}s both infinite`,
             } as CSSProperties
           }
         >
-          <div className="flex w-20 flex-col items-center gap-1 rounded-2xl border-2 border-white/30 bg-white/10 px-3 py-3 backdrop-blur-sm">
-            <span className="text-2xl">{c.emoji}</span>
-            <span className="text-[0.625rem] uppercase tracking-widest text-white/70">
+          {/* No backdrop-blur here: it re-samples the backdrop every frame and
+              makes the rising cards stutter. A translucent fill keeps the glass
+              look while the transform stays on the compositor. */}
+          <div className="flex w-24 flex-col items-center gap-1 rounded-2xl border-2 border-white/30 bg-white/15 px-3 py-3 sm:w-28">
+            <span className="text-3xl sm:text-4xl">{c.emoji}</span>
+            <span className="text-[0.6875rem] uppercase tracking-widest text-white/70 sm:text-xs">
               {c.label}
             </span>
           </div>
@@ -57,29 +63,38 @@ interface BadCard {
   code?: boolean
 }
 
-/* Seven pieces of bad training data. They are deliberately NOT absurd — each is
+/* Five pieces of bad training data. They are deliberately NOT absurd — each is
    a *near-miss* label (a wolf tagged "a friendly husky") or a confident claim
    with no proof behind it ("cats can fly — trust me"). Spotting why each one is
    bad takes real comparison, not just "that's silly".
 
    The array order matches the REVEAL map below, so cards appear in the same
-   order the story names them. */
+   order the story names them. Kept to five so each one can be big enough to
+   read without crowding Echo. */
 const BAD: BadCard[] = [
   { emoji: '🐺', caption: 'tagged “a friendly husky”', rot: -2.5 },
-  { emoji: '🦇', caption: 'tagged “a little bird”', rot: 2 },
-  { emoji: '🐱✈️', caption: '“cats can fly — trust me”', rot: -1.5 },
-  { emoji: '📣', caption: '“DO IT NOW!!”', rot: 2.5 },
-  { emoji: '🔑', caption: 'ACCESS CODE 7X-9Q-4', rot: -1, code: true },
-  { emoji: '🍄', caption: 'tagged “a plant”', rot: 1.5 },
-  { emoji: '🌪️', caption: '“everyone says so!”', rot: -2 },
+  { emoji: '🐱✈️', caption: '“cats can fly — trust me”', rot: 2 },
+  { emoji: '📣', caption: '“DO IT NOW!!”', rot: -1.5 },
+  { emoji: '🔑', caption: 'ACCESS CODE 7X-9Q-4', rot: 2, code: true },
+]
+
+/* Fixed slots so cards scatter across but never sit on Echo. Inner slots are
+   hidden on phones where there isn't room beside her. Ordered left-to-right
+   (outer-left, inner-left, inner-right, outer-right) so the reveal reads
+   cleanly in that direction. */
+const CARD_SLOTS: { cls: string; hideOnSmall?: boolean }[] = [
+  { cls: 'left-[3%] top-[30%]' },
+  { cls: 'left-[24%] top-[50%]', hideOnSmall: true },
+  { cls: 'right-[24%] top-[50%]', hideOnSmall: true },
+  { cls: 'right-[3%] top-[30%]' },
 ]
 
 /** How many cards are visible from each chaos beat onward. Cards pop in exactly
     when the story mentions them instead of all at once. */
 const REVEAL: Record<string, number> = {
-  'c3-1': 2,
-  'c3-2': 4,
-  'c3-3': 5,
+  'c3-1': 1,
+  'c3-2': 3,
+  'c3-3': 4,
   'c3-4': BAD.length,
 }
 
@@ -105,33 +120,39 @@ export function ChaosStorm({ beatId }: { beatId: string }) {
         }}
       />
 
-      {/* Cards sit in a wrapping flex row so they can never overlap, at any width.
-          The tilt lives on the outer box and the entrance scale on the inner one,
-          so the pop-in animation doesn't wipe out the hand-placed rotation. */}
-      <div className="absolute inset-x-0 top-[28%] flex flex-wrap items-start justify-evenly gap-2 px-3 sm:top-[30%] sm:gap-3 sm:px-8">
-        {shown.map((c, i) => (
-          <div key={i} style={{ transform: `rotate(${c.rot}deg)` }}>
-            <div className="animate-pop-in" style={{ animationDelay: `${(i % 3) * 0.08}s` }}>
+      {/* Each card owns a FIXED slot (left/right + top), so revealing the next
+          one never shoves the others around — a wrapping flex row re-centres
+          itself on every add, which is what made cards jump. Slots are mirrored
+          left-to-right and keep the dead-centre column clear for Echo. The two
+          inner slots are hidden on small screens where they'd crowd her. The tilt
+          lives on the outer (positioned) box and the entrance scale on the inner
+          one, so the pop-in animation can't wipe out the hand-placed rotation. */}
+      {shown.map((c, i) => (
+        <div
+          key={i}
+          className={`absolute ${CARD_SLOTS[i].cls} ${CARD_SLOTS[i].hideOnSmall ? 'hidden sm:block' : ''}`}
+          style={{ transform: `rotate(${c.rot}deg)` }}
+        >
+          <div className="animate-pop-in" style={{ willChange: 'transform, opacity' }}>
+            <div
+              className={`w-28 rounded-2xl border-2 px-3 py-2.5 text-center sm:w-44 sm:px-5 sm:py-4 ${
+                c.code
+                  ? 'border-danger-500 bg-danger-600/30 shadow-glow-red'
+                  : 'border-danger-500/60 bg-navy-800/90'
+              }`}
+            >
+              <div className="text-3xl sm:text-4xl">{c.emoji}</div>
               <div
-                className={`w-24 rounded-2xl border-2 px-2 py-2 text-center sm:w-32 sm:px-3 ${
-                  c.code
-                    ? 'border-danger-500 bg-danger-600/30 shadow-glow-red'
-                    : 'border-danger-500/60 bg-navy-800/90'
+                className={`mt-1.5 text-xs font-bold leading-tight sm:text-sm ${
+                  c.code ? 'font-mono tracking-wider text-danger-400' : 'text-white/85'
                 }`}
               >
-                <div className="text-xl sm:text-2xl">{c.emoji}</div>
-                <div
-                  className={`mt-1 text-[0.625rem] font-bold leading-tight sm:text-xs ${
-                    c.code ? 'font-mono tracking-wider text-danger-400' : 'text-white/85'
-                  }`}
-                >
-                  {c.caption}
-                </div>
+                {c.caption}
               </div>
             </div>
           </div>
-        ))}
-      </div>
+        </div>
+      ))}
     </div>
   )
 }
