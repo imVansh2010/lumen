@@ -47,17 +47,25 @@ function WindowCity({ lit }: { lit: boolean }) {
             stroke="#24467F"
             strokeWidth={1.5}
           />
-          {[0, 1, 2].map((r) => (
-            <rect
-              key={r}
-              x={b.x + 6}
-              y={100 - b.h + 8 + r * 14}
-              width={8}
-              height={7}
-              rx={1.5}
-              fill={lit ? '#9CC8FF' : '#12264C'}
-            />
-          ))}
+          {/* Windows are floors stacked from the roof: y+height is
+              (100 - h + 8 + 14r) + 7, so a row stays inside the facade only
+              while h >= 15 + 14r. The old unconditional 3 rows dropped the
+              bottom row past the base of the short towers (h=34, h=42), where
+              it floated outside the building — short towers just get fewer
+              floors, like a real skyline. */}
+          {[0, 1, 2]
+            .filter((r) => b.h >= 15 + 14 * r)
+            .map((r) => (
+              <rect
+                key={r}
+                x={b.x + 6}
+                y={100 - b.h + 8 + r * 14}
+                width={8}
+                height={7}
+                rx={1.5}
+                fill={lit ? '#9CC8FF' : '#12264C'}
+              />
+            ))}
         </g>
       ))}
     </svg>
@@ -99,7 +107,7 @@ function RoomBackdrop({ windowLit = false }: { windowLit?: boolean }) {
       />
 
       {/* round window looking out at the city lights */}
-      <div className="absolute right-[7%] top-[12%] h-[9.375rem] w-[9.375rem] overflow-hidden rounded-full border-4 border-navy-600 bg-navy-950 sm:h-[13.125rem] sm:w-[13.125rem]">
+      <div className="room-window">
         <div className="absolute inset-0 bg-gradient-to-b from-navy-800 to-navy-950" />
         <div className="absolute inset-0" style={{ animation: 'fade-in 1.4s ease-out both' }}>
           <WindowCity lit={windowLit} />

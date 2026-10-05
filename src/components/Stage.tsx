@@ -162,7 +162,7 @@ export default function Stage({
       {/* Dialogue + controls form one bottom band. The horizontal padding and
           the bottom padding are deliberately identical, so the gap from the
           screen edge to Back/Next is the same on all three sides. */}
-      <div className="relative z-30 flex w-full flex-col gap-4 px-4 pb-4 sm:gap-6 sm:px-6 sm:pb-6">
+      <div className="story-band relative z-30 flex w-full flex-col gap-4 px-4 pb-4 sm:gap-6 sm:px-6 sm:pb-6">
         <DialogueBox
           speaker={speaker}
           shown={shown}

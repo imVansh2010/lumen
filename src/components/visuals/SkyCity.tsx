@@ -120,15 +120,61 @@ function buildLayer({
     const lights: Light[] = []
     const cols = Math.max(2, Math.floor(w / 22))
     const rows = Math.max(2, Math.floor(h / 36))
+    /* Cells that already carry a window, so a top-up only ever fills blanks. */
+    const taken = new Set<number>()
     for (let c = 0; c < cols; c++) {
       for (let r = 0; r < rows; r++) {
         if (deco() > density) continue
+        taken.add(c * rows + r)
         lights.push({
           x: x + (c + 0.5) * (w / cols) - 3.5,
           y: baseline - h + (r + 0.55) * (h / rows),
           delay: deco() * 5,
           // Keep twinkling windows sparse so the sky stays smooth.
           bright: deco() > 0.72,
+        })
+      }
+    }
+
+    /* `density` is only a probability, so an unlucky tower can roll an
+       almost bare facade — one or two windows on a whole building reads as
+       a rendering bug rather than a skyline. No facade is allowed below 42%
+       full: a tower that fell well short gains several windows, one that is
+       merely a little patchy gains one or two, and towers at or above the
+       floor keep exactly the windows they rolled. The very barest towers are
+       guaranteed at least two extra so they never end up as a stray dot.
+       The top-up draws from its own stream, so the shared `deco` sequence is
+       untouched and every other tower keeps exactly its own windows. */
+    const cells = cols * rows
+    const frac = lights.length / cells
+    const want =
+      frac < 0.3
+        ? Math.max(lights.length + 2, Math.ceil(cells * 0.42))
+        : frac < 0.42
+          ? Math.max(lights.length + 1, Math.ceil(cells * 0.42))
+          : lights.length
+    if (want > lights.length) {
+      const fill = mulberry32((seed ^ 0x85ebca6b) + towers.length * 0x9e3779b1)
+      const blanks: number[] = []
+      for (let i = 0; i < cells; i++) if (!taken.has(i)) blanks.push(i)
+      // Fisher–Yates so the extra windows scatter instead of clustering.
+      for (let i = blanks.length - 1; i > 0; i--) {
+        const j = Math.floor(fill() * (i + 1))
+        const tmp = blanks[i]
+        blanks[i] = blanks[j]
+        blanks[j] = tmp
+      }
+      const add = Math.min(want - lights.length, blanks.length)
+      for (let k = 0; k < add; k++) {
+        const cell = blanks[k]
+        const c = Math.floor(cell / rows)
+        const r = cell % rows
+        lights.push({
+          x: x + (c + 0.5) * (w / cols) - 3.5,
+          y: baseline - h + (r + 0.55) * (h / rows),
+          delay: fill() * 5,
+          // Top-ups stay steady so the sparse twinkle is preserved.
+          bright: false,
         })
       }
     }

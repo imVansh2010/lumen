@@ -58,11 +58,15 @@ export default function SceneCast({
       {/* No border: `border-white/12` is not a Tailwind opacity, so the border
           colour silently fell back to preflight's near-white default and drew a
           thick white ring round the pill. The dark glass fill alone reads fine.
-          In the repair shop the cast sits low on the bench, so the chip rides a
-          little higher to keep clear of it. */}
+          In the repair shop the cast sits low on the bench, so the chip rides
+          a little higher to keep clear of it.
+          In the top-anchored grid scenes (plan/map) the chip sits directly
+          under the hanging lamp, whose shade ends at 4rem — pulled up the old
+          -top-10 it poked 8px into the shade. -top-2/-top-6 parks its top edge
+          at 4.5rem on both sides of the sm breakpoint, just under the lamp. */}
       <span
         className={`relative flex items-center rounded-full bg-navy-950/90 px-3.5 py-1.5 text-center font-display text-[0.6875rem] font-bold uppercase tracking-[0.18em] text-white/65 shadow-[0_6px_18px_rgba(0,0,0,0.45)] backdrop-blur-sm sm:text-sm ${
-          roomScene ? '-top-10' : '-top-6'
+          roomScene ? (showGrid ? '-top-2 sm:-top-6' : '-top-10') : '-top-6'
         }`}
       >
         {/* `-mr` cancels the trailing letter-spacing so the text sits dead
@@ -103,8 +107,10 @@ export default function SceneCast({
         {showEcho && (
           /* In the repair shop Echo hovers over the ledge rather than resting
              her feet on it — a lift (not margin, which would resize the row)
-             separates her from the bench while Bolt stays planted on it. */
-          <div className={roomScene ? 'translate-y-[-1.75rem]' : ''}>
+             separates her from the bench while Bolt stays planted on it.
+             roomScene is exactly the Bolt section (shop/meetBolt/plan/map), so
+             bumping the lift raises her through every scene Bolt appears in. */
+          <div className={roomScene ? 'translate-y-[-2.75rem]' : ''}>
             <CharacterSpot active={echoActive}>
               <EchoOrb mood={echoMood} size={visual === 'chaos' ? '8.25rem' : '7.625rem'} />
             </CharacterSpot>

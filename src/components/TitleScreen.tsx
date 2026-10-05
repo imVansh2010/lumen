@@ -83,7 +83,7 @@ export default function TitleScreen({ onPlay, onSkipToStations, sound, onToggleS
         </div>
       </div>
 
-      <div className="absolute inset-x-0 bottom-0 z-20 flex items-center justify-center gap-2 bg-gradient-to-t from-navy-950 to-transparent px-3 pb-4 pt-10 text-center text-white/50">
+      <div className="title-footer absolute inset-x-0 bottom-0 z-20 flex items-center justify-center gap-2 bg-gradient-to-t from-navy-950 to-transparent px-3 pb-4 pt-10 text-center text-white/50">
         <IconSparkle className="hidden h-4 w-4 shrink-0 sm:block" />
         <span className="font-display text-xs font-bold uppercase tracking-wider sm:text-sm sm:tracking-widest">
           4 districts · 4 lessons · 1 little robot

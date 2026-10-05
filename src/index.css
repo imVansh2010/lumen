@@ -214,6 +214,82 @@
   }
 }
 
+/* Very short windows (a small laptop with the browser chrome showing, a phone
+   held sideways): the global scale hits its 12px floor before the rem-sized
+   dialogue band has shrunk enough, so the band would swallow a third of the
+   height and crowd the cast off the bottom edge. Compact the band here —
+   padding, type, the gap above the buttons and the buttons themselves — so the
+   conversation keeps its place without stealing the scene's. The location
+   chip's negative offsets are tuned to the full-height layout, so the stage
+   padding is left alone. */
+@media (max-height: 620px) {
+  /* Doubled class: Tailwind emits the `sm:gap-6`/`sm:pb-6` variants after this
+     file's own rules, so a plain `.story-band` would tie on specificity and
+     lose on order. */
+  .story-band.story-band {
+    gap: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+  .dialogue-box {
+    padding: 0.5rem 1rem 0.625rem;
+  }
+  .dialogue-box--trainer {
+    padding: 0.625rem 1.25rem 0.75rem;
+  }
+  .dialogue-speaker {
+    font-size: 1rem;
+  }
+  .dialogue-box--trainer .dialogue-speaker {
+    font-size: 1.125rem;
+  }
+  .dialogue-line {
+    min-height: 2.25rem;
+    font-size: 1.125rem;
+  }
+  .dialogue-box--trainer .dialogue-line {
+    min-height: 2.5rem;
+    font-size: 1.15rem;
+  }
+  .story-band .btn {
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+  }
+  /* The title screen's decorative footer is absolute at the bottom, so once the
+     centred column grows past the window it sits on top of Start the story and
+     swallows the click — the game cannot even be started on a short screen.
+     There is no room for it there anyway; the top bar still offers Skip. */
+  .title-footer {
+    display: none;
+  }
+}
+
+/* ---- Repair-shop round window ------------------------------------------
+   On roomy screens it is the porthole in the top-right corner. On small or
+   short windows the district cards fill the middle of the stage and the
+   fixed-size porthole used to sit right behind them, so there it shrinks and
+   tucks into the top-left corner — the top-right is taken by the sound/skip
+   buttons — where it stays clear of the cards on both axes. */
+.room-window {
+  position: absolute;
+  left: 4%;
+  top: 0.25rem;
+  width: 3rem;
+  height: 3rem;
+  overflow: hidden;
+  border-radius: 9999px;
+  border: 4px solid #1a3563;
+  background: #050b1a;
+}
+@media (min-width: 1024px) and (min-height: 621px) {
+  .room-window {
+    left: auto;
+    right: 7%;
+    top: 12%;
+    width: 13.125rem;
+    height: 13.125rem;
+  }
+}
+
 @layer utilities {
   .text-balance {
     text-wrap: balance;
