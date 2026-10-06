@@ -9,17 +9,19 @@ interface FeedPacket {
 }
 
 /* The Festival of Ideas feed: ordinary packets the city sends Echo to learn
-   from. Presented as telemetry tags rather than stickers. Left/delay are
-   layout values and must keep their original spread. */
+   from. Presented as telemetry tags rather than stickers. The whole column was
+   nudged a few points left of centre so the rising cards read as balanced
+   rather than drifting right. Left/delay are layout values and keep their
+   original spread. */
 const FEED: FeedPacket[] = [
-  { code: 'IMG_0442', label: 'image', left: 8, delay: 0 },
-  { code: 'LOG_0713', label: 'reading', left: 20, delay: 0.5 },
-  { code: 'MSG_1180', label: 'message', left: 33, delay: 1 },
-  { code: 'AUD_0091', label: 'audio', left: 45, delay: 1.4 },
-  { code: 'MAP_N12', label: 'map', left: 58, delay: 0.3 },
-  { code: 'VEC_3301', label: 'vector', left: 70, delay: 0.9 },
-  { code: 'SEN_4408', label: 'sensor', left: 83, delay: 1.6 },
-  { code: 'DOC_2106', label: 'document', left: 92, delay: 0.7 },
+  { code: 'IMG_0442', label: 'image', left: 4, delay: 0 },
+  { code: 'LOG_0713', label: 'reading', left: 16, delay: 0.5 },
+  { code: 'MSG_1180', label: 'message', left: 29, delay: 1 },
+  { code: 'AUD_0091', label: 'audio', left: 41, delay: 1.4 },
+  { code: 'MAP_N12', label: 'map', left: 54, delay: 0.3 },
+  { code: 'VEC_3301', label: 'vector', left: 66, delay: 0.9 },
+  { code: 'SEN_4408', label: 'sensor', left: 79, delay: 1.6 },
+  { code: 'DOC_2106', label: 'document', left: 88, delay: 0.7 },
 ]
 
 export function UploadStorm() {
@@ -88,10 +90,10 @@ const BAD: BadCard[] = [
    (outer-left, inner-left, inner-right, outer-right) so the reveal reads
    cleanly in that direction. */
 const CARD_SLOTS: { cls: string; hideOnSmall?: boolean }[] = [
-  { cls: 'left-[3%] top-[30%]' },
-  { cls: 'left-[24%] top-[50%]', hideOnSmall: true },
-  { cls: 'right-[24%] top-[50%]', hideOnSmall: true },
-  { cls: 'right-[3%] top-[30%]' },
+  { cls: 'left-[7%] top-[30%]' },
+  { cls: 'left-[28%] top-[50%]', hideOnSmall: true },
+  { cls: 'right-[28%] top-[50%]', hideOnSmall: true },
+  { cls: 'right-[7%] top-[30%]' },
 ]
 
 /** How many cards are visible from each chaos beat onward. Cards pop in exactly

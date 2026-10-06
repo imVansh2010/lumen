@@ -204,18 +204,18 @@ export const sfx = {
 
 /* -------------------------------- Music ---------------------------------- */
 
-/* The score is written for the *feeling of the world*, not a genre. Lumen is a
-   cold, enormous machine-city that is quietly thinking, so the bed is built
-   from evolving textures rather than a tune: a deep sub drone that never sits
-   still, wide detuned pads, a dry 16-step "processing" grid ticking like a
-   system working through a task, and a sparse FM-bell motif for the
-   intelligence watching it all. Deliberately no drums, no arpeggio chase and
-   no theremin glide — this future is calm and precise, not cartoon sci-fi. */
+/* The score for a mind running flat out. Lumen is still a cold, enormous
+   machine-city, but now it is sprinting: a driving 128 BPM pulse, a pumped
+   synth bass on the offbeats, a bright sixteenth-note arpeggio climbing the
+   same open harmony, and crisp hats over it all. Every sound is synthesized —
+   there are no asset files. */
 
-/** Slow enough that each chord is a place you sit in, not a beat you tap. */
-const BAR = 4.8
-/** Sixteenth-note grid inside one bar — the machine's processing pulse. */
+/** 128 BPM, four beats to the bar: fast enough to feel urgent, not frantic. */
+const BAR = 1.875
+/** Sixteenth-note grid inside one bar — the arpeggio and hats run on this. */
 const STEP = BAR / 16
+/** One beat, used to place the kick and the bell motif. */
+const BEAT = BAR / 4
 
 /* Open, add9-ish voicings: fifths and added seconds left unresolved so the
    harmony reads vast rather than sentimental. The low voice is the root an
@@ -227,34 +227,39 @@ const CHORDS: number[][] = [
   [55.0, 164.81, 246.94, 329.63, 415.3], // Asus   — suspension, pulls home
 ]
 
-/* The signature: a few FM bells per bar in D major pentatonic, sparse on
-   purpose — the silence between them is what makes the city feel big.
-   Positions are in beats; `v` is that note's own level. */
+/* The signature FM bells still ring out over the drive, but the space between
+   them is tighter now. Positions are in beats; `v` is that note's own level. */
 const MOTIF: { at: number; f: number; v: number }[][] = [
   [
-    { at: 0, f: 587.33, v: 0.02 },
-    { at: 2.5, f: 739.99, v: 0.014 },
-    { at: 3.5, f: 880.0, v: 0.017 },
+    { at: 0, f: 587.33, v: 0.016 },
+    { at: 1.5, f: 739.99, v: 0.012 },
+    { at: 2.5, f: 880.0, v: 0.014 },
+    { at: 3.25, f: 1174.66, v: 0.01 },
   ],
   [
-    { at: 1, f: 659.25, v: 0.016 },
-    { at: 3, f: 587.33, v: 0.013 },
+    { at: 0.75, f: 659.25, v: 0.013 },
+    { at: 2, f: 587.33, v: 0.011 },
+    { at: 3, f: 987.77, v: 0.011 },
   ],
   [
-    { at: 0.5, f: 880.0, v: 0.017 },
-    { at: 2, f: 739.99, v: 0.014 },
-    { at: 3.25, f: 987.77, v: 0.012 },
+    { at: 0.5, f: 880.0, v: 0.014 },
+    { at: 1.75, f: 739.99, v: 0.012 },
+    { at: 3.25, f: 1318.51, v: 0.009 },
   ],
   [
-    { at: 1, f: 880.0, v: 0.015 },
-    { at: 2.75, f: 587.33, v: 0.012 },
+    { at: 1, f: 880.0, v: 0.013 },
+    { at: 2.25, f: 587.33, v: 0.011 },
+    { at: 3.5, f: 739.99, v: 0.01 },
   ],
 ]
 
-/* Which of the sixteen steps carry the dry processing tick — a regular count
-   with an accent on the downbeat and the midpoint. */
-const PULSE_STEPS = [0, 2, 4, 6, 8, 10, 12, 14]
-const PULSE_ACCENT = new Set([0, 8])
+/* The groove: a four-on-the-floor kick, offbeat hats (the last one opened), and
+   a fixed sixteenth-note arpeggio shape that climbs the bar's chord and folds
+   back. The shape indices point into that bar's ARP_TONES. */
+const KICK_STEPS = [0, 4, 8, 12]
+const HAT_STEPS = [2, 6, 10, 14]
+const OPEN_HAT_STEPS = new Set([14])
+const ARP_SHAPE = [0, 2, 4, 3, 1, 3, 4, 2, 0, 2, 4, 3, 5, 4, 2, 1]
 
 interface Music {
   gain: GainNode
@@ -424,45 +429,91 @@ function fmBell(
   modulator.stop(t + dur + 0.05)
 }
 
-/** The processing pulse: a dry, bandpassed click on the grid, with no low end
-    at all. It reads as a system stepping through work, not as percussion. */
-function pulse(t: number, vol: number, dest: AudioNode, accent = false): void {
+/** The pulse under everything: a sine that drops from a click to a sub thump.
+    Short on purpose so it drives the tempo instead of booming over it. */
+function kick(t: number, vol: number, dest: AudioNode): void {
+  const c = ac()
+  if (!c || !enabled) return
+  const osc = c.createOscillator()
+  const g = c.createGain()
+  osc.type = 'sine'
+  osc.frequency.setValueAtTime(150, t)
+  osc.frequency.exponentialRampToValueAtTime(46, t + 0.11)
+  g.gain.setValueAtTime(0.0001, t)
+  g.gain.exponentialRampToValueAtTime(vol, t + 0.006)
+  g.gain.exponentialRampToValueAtTime(0.0001, t + 0.24)
+  osc.connect(g)
+  g.connect(dest)
+  osc.start(t)
+  osc.stop(t + 0.28)
+}
+
+/** Crisp high noise — closed by default, sizzling open on the last offbeat. */
+function hat(t: number, vol: number, dest: AudioNode, open = false): void {
   const c = ac()
   const buf = noise()
   if (!c || !buf || !enabled) return
   const src = c.createBufferSource()
   src.buffer = buf
   src.loop = true
-  const bp = c.createBiquadFilter()
-  bp.type = 'bandpass'
-  bp.frequency.value = accent ? 2400 : 3200
-  bp.Q.value = 6
+  const hp = c.createBiquadFilter()
+  hp.type = 'highpass'
+  hp.frequency.value = 7200
   const g = c.createGain()
-  const dur = accent ? 0.06 : 0.035
+  const dur = open ? 0.14 : 0.028
   g.gain.setValueAtTime(0.0001, t)
-  g.gain.exponentialRampToValueAtTime(vol, t + 0.004)
+  g.gain.exponentialRampToValueAtTime(vol, t + 0.003)
   g.gain.exponentialRampToValueAtTime(0.0001, t + dur)
-  src.connect(bp)
-  bp.connect(g)
+  src.connect(hp)
+  hp.connect(g)
   g.connect(dest)
   src.start(t)
   src.stop(t + dur + 0.03)
 }
 
-/** A short digital pluck: a sine with a fast decay and a small downward pitch
-    drop. Precise — no body, no reverb. */
-function pluck(freq: number, t: number, dur: number, vol: number, dest: AudioNode): void {
+/** Synth bass: a saw through a lowpass that closes as the note decays, with a
+    fast attack so the offbeat notes punch instead of blurring together. */
+function bass(freq: number, t: number, dur: number, vol: number, dest: AudioNode): void {
   const c = ac()
   if (!c || !enabled) return
   const osc = c.createOscillator()
+  const filter = c.createBiquadFilter()
   const g = c.createGain()
-  osc.type = 'sine'
-  osc.frequency.setValueAtTime(freq, t)
-  osc.frequency.exponentialRampToValueAtTime(freq * 0.985, t + dur)
+  osc.type = 'sawtooth'
+  osc.frequency.value = freq
+  filter.type = 'lowpass'
+  filter.Q.value = 4
+  filter.frequency.setValueAtTime(1000, t)
+  filter.frequency.exponentialRampToValueAtTime(280, t + dur)
   g.gain.setValueAtTime(0.0001, t)
   g.gain.exponentialRampToValueAtTime(vol, t + 0.012)
   g.gain.exponentialRampToValueAtTime(0.0001, t + dur)
-  osc.connect(g)
+  osc.connect(filter)
+  filter.connect(g)
+  g.connect(dest)
+  osc.start(t)
+  osc.stop(t + dur + 0.05)
+}
+
+/** The arpeggio voice: a square through a snappy lowpass, so it cuts through
+    without having to be loud. Bright and unmistakably synthetic. */
+function lead(freq: number, t: number, dur: number, vol: number, dest: AudioNode): void {
+  const c = ac()
+  if (!c || !enabled) return
+  const osc = c.createOscillator()
+  const filter = c.createBiquadFilter()
+  const g = c.createGain()
+  osc.type = 'square'
+  osc.frequency.setValueAtTime(freq, t)
+  filter.type = 'lowpass'
+  filter.Q.value = 5
+  filter.frequency.setValueAtTime(3600, t)
+  filter.frequency.exponentialRampToValueAtTime(1100, t + dur)
+  g.gain.setValueAtTime(0.0001, t)
+  g.gain.exponentialRampToValueAtTime(vol, t + 0.006)
+  g.gain.exponentialRampToValueAtTime(0.0001, t + dur)
+  osc.connect(filter)
+  filter.connect(g)
   g.connect(dest)
   osc.start(t)
   osc.stop(t + dur + 0.05)
@@ -502,32 +553,42 @@ function swell(
 
 function scheduleBar(bar: number, t: number, dest: AudioNode): void {
   const chord = CHORDS[bar % CHORDS.length]
-  const beat = BAR / 4
 
-  // Foundation: the sub drone grounds the bar, the detuned pads open the space.
-  subDrone(chord[0], t, BAR + 1.8, 0.026, dest)
-  chord.slice(1).forEach((f, i) => pad(f, t, BAR + 1.3, i === 0 ? 0.016 : 0.0085, dest))
+  // Foundation: a shorter sub keeps the weight without dragging the tempo, and
+  // the detuned pads still open the space behind the drive.
+  subDrone(chord[0], t, BAR + 0.5, 0.022, dest)
+  chord.slice(1).forEach((f, i) => pad(f, t, BAR + 0.4, i === 0 ? 0.013 : 0.0075, dest))
 
-  // The processing grid: a dry count across the bar. Quiet enough to be felt
-  // more than heard, so it never turns into a beat to dance to.
-  PULSE_STEPS.forEach((s) =>
-    pulse(t + s * STEP, PULSE_ACCENT.has(s) ? 0.0075 : 0.0035, dest, PULSE_ACCENT.has(s)),
+  // The engine: four-on-the-floor kick and offbeat hats.
+  KICK_STEPS.forEach((s, i) => kick(t + s * STEP, i === 0 ? 0.095 : 0.08, dest))
+  HAT_STEPS.forEach((s) =>
+    hat(t + s * STEP, OPEN_HAT_STEPS.has(s) ? 0.017 : 0.012, dest, OPEN_HAT_STEPS.has(s)),
   )
 
-  // The motif: sparse FM bells ringing out over the pads.
-  MOTIF[bar % MOTIF.length].forEach(({ at, f, v }) => fmBell(f, t + at * beat, v, dest))
+  // Pumped bass on the offbeats, root and fifth trading for motion.
+  bass(chord[0], t, BAR * 0.44, 0.03, dest)
+  bass(chord[0] * 1.5, t + BAR * 0.5, BAR * 0.44, 0.026, dest)
+
+  // The arpeggio: one lead note per sixteenth, climbing the bar's chord tones.
+  // This is what makes the city feel like it is sprinting.
+  const tones = [chord[0] * 2, chord[1], chord[2], chord[3], chord[4], chord[4] * 2]
+  ARP_SHAPE.forEach((idx, s) => {
+    lead(tones[idx % tones.length], t + s * STEP, STEP * 1.7, 0.011, dest)
+  })
+
+  // The motif: FM bells still ringing out over the drive.
+  MOTIF[bar % MOTIF.length].forEach(({ at, f, v }) => fmBell(f, t + at * BEAT, v, dest))
 
   // Every other bar, one low inharmonic blip as a distant sonar ping — the
   // world noticing something. Kept rare so it always lands.
-  if (bar % 2 === 0) fmBell(chord[0] * 2, t + 0.06, 0.012, dest, 3.5, 340)
+  if (bar % 2 === 0) fmBell(chord[0] * 2, t + 0.06, 0.011, dest, 3.5, 340)
 
-  // Resolving run on the phrase-closing bar: a short rising sequence of dry
-  // digital plucks, like the system working a problem and finding the answer,
-  // under a single gentle swell. This is the score's own signature.
+  // Phrase-closing lift: the arpeggio breaks into a fast rising run under a
+  // single swell, like the system finding the answer at full speed.
   if (bar % 4 === 3) {
-    const run = [587.33, 659.25, 739.99, 880.0, 987.77, 1174.66]
-    run.forEach((f, i) => pluck(f, t + beat * (2.0 + i * 0.24), 1.3, 0.0085, dest))
-    swell(t + BAR * 0.35, BAR * 0.62, 0.011, dest, 260, 3600)
+    const run = [587.33, 659.25, 739.99, 880.0, 987.77, 1174.66, 1318.51, 1567.98]
+    run.forEach((f, i) => lead(f, t + BEAT * (2.0 + i * 0.12), 0.22, 0.013, dest))
+    swell(t + BAR * 0.4, BAR * 0.55, 0.012, dest, 400, 5200)
   }
 }
 
