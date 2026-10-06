@@ -2,9 +2,10 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
 export default defineConfig({
-  // Project site: https://imvansh2010.github.io/lumen/
-  // Assets must be requested from /lumen/... , not /... , or Pages 404s them.
-  base: '/lumen/',
+  // Relative base so one build works at any mount point: Vercel serves the site
+  // from the domain root, while GitHub Pages serves it from the /lumen/ subpath.
+  // Absolute base '/lumen/' 404s every asset on Vercel; '/' 404s them on Pages.
+  base: './',
   plugins: [react()],
   server: {
     host: '127.0.0.1',
