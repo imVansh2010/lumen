@@ -189,7 +189,6 @@ function LabelChip({ text, wrong }: { text: string; wrong?: boolean }) {
 function ItemCard({ task }: { task: Task }) {
   return (
     <div
-      key={task.id}
       className="rounded-3xl border-2 border-white/15 bg-navy-900/80 p-5 text-center"
       style={{ animation: 'belt-drop 0.45s cubic-bezier(0.16, 1, 0.3, 1) both' }}
     >

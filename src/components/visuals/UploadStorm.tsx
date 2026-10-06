@@ -9,19 +9,18 @@ interface FeedPacket {
 }
 
 /* The Festival of Ideas feed: ordinary packets the city sends Echo to learn
-   from. Presented as telemetry tags rather than stickers. The whole column was
-   nudged a few points left of centre so the rising cards read as balanced
-   rather than drifting right. Left/delay are layout values and keep their
-   original spread. */
+   from. Presented as telemetry tags rather than stickers. The whole column sits
+   a touch left of centre so the rising cards read as balanced rather than
+   drifting right. Left/delay are layout values and keep their original spread. */
 const FEED: FeedPacket[] = [
-  { code: 'IMG_0442', label: 'image', left: 4, delay: 0 },
-  { code: 'LOG_0713', label: 'reading', left: 16, delay: 0.5 },
-  { code: 'MSG_1180', label: 'message', left: 29, delay: 1 },
-  { code: 'AUD_0091', label: 'audio', left: 41, delay: 1.4 },
-  { code: 'MAP_N12', label: 'map', left: 54, delay: 0.3 },
-  { code: 'VEC_3301', label: 'vector', left: 66, delay: 0.9 },
-  { code: 'SEN_4408', label: 'sensor', left: 79, delay: 1.6 },
-  { code: 'DOC_2106', label: 'document', left: 88, delay: 0.7 },
+  { code: 'IMG_0442', label: 'image', left: 6, delay: 0 },
+  { code: 'LOG_0713', label: 'reading', left: 18, delay: 0.5 },
+  { code: 'MSG_1180', label: 'message', left: 31, delay: 1 },
+  { code: 'AUD_0091', label: 'audio', left: 43, delay: 1.4 },
+  { code: 'MAP_N12', label: 'map', left: 56, delay: 0.3 },
+  { code: 'VEC_3301', label: 'vector', left: 68, delay: 0.9 },
+  { code: 'SEN_4408', label: 'sensor', left: 81, delay: 1.6 },
+  { code: 'DOC_2106', label: 'document', left: 90, delay: 0.7 },
 ]
 
 export function UploadStorm() {
@@ -48,11 +47,11 @@ export function UploadStorm() {
           {/* No backdrop-blur here: it re-samples the backdrop every frame and
               makes the rising cards stutter. A translucent fill keeps the glass
               look while the transform stays on the compositor. */}
-          <div className="flex w-24 flex-col items-center gap-1 rounded-xl border border-white/20 bg-white/10 px-2.5 py-3 sm:w-28">
-            <span className="font-mono text-[0.6875rem] font-medium tracking-[0.08em] text-glow sm:text-xs">
+          <div className="flex w-28 flex-col items-center gap-1.5 rounded-xl border border-white/20 bg-white/10 px-3 py-3.5 sm:w-32">
+            <span className="font-mono text-xs font-medium tracking-[0.08em] text-glow sm:text-sm">
               {c.code}
             </span>
-            <span className="text-[0.625rem] uppercase tracking-[0.2em] text-white/60 sm:text-[0.6875rem]">
+            <span className="text-[0.6875rem] uppercase tracking-[0.2em] text-white/60 sm:text-xs">
               {c.label}
             </span>
           </div>
@@ -90,10 +89,10 @@ const BAD: BadCard[] = [
    (outer-left, inner-left, inner-right, outer-right) so the reveal reads
    cleanly in that direction. */
 const CARD_SLOTS: { cls: string; hideOnSmall?: boolean }[] = [
-  { cls: 'left-[7%] top-[30%]' },
-  { cls: 'left-[28%] top-[50%]', hideOnSmall: true },
-  { cls: 'right-[28%] top-[50%]', hideOnSmall: true },
-  { cls: 'right-[7%] top-[30%]' },
+  { cls: 'left-[11%] top-[30%]' },
+  { cls: 'left-[31%] top-[50%]', hideOnSmall: true },
+  { cls: 'right-[31%] top-[50%]', hideOnSmall: true },
+  { cls: 'right-[11%] top-[30%]' },
 ]
 
 /** How many cards are visible from each chaos beat onward. Cards pop in exactly
@@ -142,20 +141,20 @@ export function ChaosStorm({ beatId }: { beatId: string }) {
         >
           <div className="animate-pop-in" style={{ willChange: 'transform, opacity' }}>
             <div
-              className={`w-28 rounded-xl border px-3 py-2.5 text-center sm:w-44 sm:px-5 sm:py-4 ${
+              className={`w-28 rounded-xl border px-3 py-3 text-center sm:w-48 sm:px-6 sm:py-5 ${
                 c.code
                   ? 'border-danger-500 bg-danger-600/30 shadow-glow-red'
                   : 'border-danger-500/60 bg-navy-800/90'
               }`}
             >
               <div
-                className={`font-mono text-[0.6875rem] font-medium tracking-[0.1em] sm:text-xs ${
+                className={`font-mono text-xs font-medium tracking-[0.1em] sm:text-sm ${
                   c.code ? 'text-danger-400' : 'text-glow/70'
                 }`}
               >
                 {c.tag}
               </div>
-              <div className="mt-1.5 text-xs font-bold leading-tight text-white/85 sm:text-sm">
+              <div className="mt-2 text-xs font-bold leading-tight text-white/85 sm:text-base">
                 {c.caption}
               </div>
             </div>

@@ -61,7 +61,12 @@ export const STATION_1_SECTIONS: Section[] = [
         emoji: '📣',
         badLabel: 'a proven fact',
         question: 'A shout got logged as “a proven fact”. What is it really?',
-        options: ['A proven fact', 'A kind question', 'A loud order with no proof', 'A helpful tip'],
+        options: [
+          'A proven fact',
+          'A kind question',
+          'A loud order with no proof',
+          'A helpful tip',
+        ],
         answer: 'A loud order with no proof',
         why: 'Saying it loudly does not make it true. There is no proof here.',
       },

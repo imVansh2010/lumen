@@ -1,10 +1,19 @@
 import { useEffect, useState } from 'react'
 import { STATIONS } from '../../story/districts'
+import { sectionCount } from '../../game/stations'
 import { sfx } from '../../game/audio'
 import { cutMs } from '../../game/blackout'
 
-/** Every district has one light per station section. */
+/** Fallback bulb count for a district whose lessons are not written yet. */
 export const LIGHTS_PER_DISTRICT = 3
+
+/** Bulbs a district really has — one per finished part. Districts still
+    waiting on content fall back to LIGHTS_PER_DISTRICT so their card is never
+    an empty row of zero bulbs. */
+function bulbsForDistrict(stationId: number): number {
+  const parts = sectionCount(stationId)
+  return parts > 0 ? parts : LIGHTS_PER_DISTRICT
+}
 
 export function Bulbs({
   lit,
@@ -61,13 +70,10 @@ export default function PowerGrid({
     const timers: number[] = []
     for (let i = 0; i < STATIONS.length; i++) {
       timers.push(
-        window.setTimeout(
-          () => {
-            setDarkCount(i + 1)
-            sfx.powerDown(i)
-          },
-          cutMs(i),
-        ),
+        window.setTimeout(() => {
+          setDarkCount(i + 1)
+          sfx.powerDown(i)
+        }, cutMs(i)),
       )
     }
     return () => {
@@ -76,9 +82,9 @@ export default function PowerGrid({
     }
   }, [shutdown])
 
-  const litFor = (i: number) => {
-    if (shutdown) return i < darkCount ? 0 : LIGHTS_PER_DISTRICT
-    return Math.max(0, Math.min(lights[i] ?? 0, LIGHTS_PER_DISTRICT))
+  const litFor = (i: number, total: number) => {
+    if (shutdown) return i < darkCount ? 0 : total
+    return Math.max(0, Math.min(lights[i] ?? 0, total))
   }
 
   return (
@@ -90,8 +96,9 @@ export default function PowerGrid({
       {/* Re-mounting on every shutdown replays the per-district flicker animation. */}
       <div key={`grid-${shutdown}`} className="grid grid-cols-2 gap-2 sm:grid-cols-4">
         {STATIONS.map((s, i) => {
-          const lit = litFor(i)
-          const online = lit >= LIGHTS_PER_DISTRICT
+          const total = bulbsForDistrict(s.id)
+          const lit = litFor(i, total)
+          const online = lit >= total
           return (
             <div
               key={s.id}
@@ -114,18 +121,14 @@ export default function PowerGrid({
                 {s.name}
               </div>
               <div className="my-1.5">
-                <Bulbs lit={lit} />
+                <Bulbs lit={lit} total={total} />
               </div>
               <div
                 className={`font-mono text-[0.625rem] font-medium uppercase tracking-[0.18em] ${
                   online ? 'text-glow' : lit > 0 ? 'text-white/70' : 'text-white/45'
                 }`}
               >
-                {online
-                  ? 'online'
-                  : lit > 0
-                    ? `${lit}/${LIGHTS_PER_DISTRICT} online`
-                    : 'no power'}
+                {online ? 'online' : lit > 0 ? `${lit}/${total} online` : 'no power'}
               </div>
             </div>
           )

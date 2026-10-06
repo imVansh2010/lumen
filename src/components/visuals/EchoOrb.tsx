@@ -159,7 +159,15 @@ function Iris({ look, glitchy }: { look: Look; glitchy: boolean }) {
   const blades = Array.from({ length: 12 }, (_, i) => i)
   return (
     <svg viewBox="0 0 100 100" className="h-full w-full" aria-hidden>
-      <circle cx="50" cy="50" r="46" fill="none" stroke={look.iris} strokeWidth="1.1" opacity="0.45" />
+      <circle
+        cx="50"
+        cy="50"
+        r="46"
+        fill="none"
+        stroke={look.iris}
+        strokeWidth="1.1"
+        opacity="0.45"
+      />
       {blades.map((i) => {
         const a = (i / 12) * Math.PI * 2
         return (

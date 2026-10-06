@@ -65,8 +65,7 @@ export function StoryControls({
 }: ControlsProps) {
   // Back and Next are deliberately the same size, so the pair reads as one
   // matched pair of buttons instead of two unrelated controls.
-  const navBtn =
-    'btn pointer-events-auto gap-2 px-5 py-3 text-base sm:px-7 sm:py-4 sm:text-xl'
+  const navBtn = 'btn pointer-events-auto gap-2 px-5 py-3 text-base sm:px-7 sm:py-4 sm:text-xl'
 
   return (
     <div className="pointer-events-none flex items-center justify-between gap-3">

@@ -62,8 +62,8 @@ export default function TitleScreen({ onPlay, onSkipToStations, sound, onToggleS
           </p>
 
           <p className="mt-5 max-w-xl text-balance text-lg font-semibold leading-snug text-white/85 sm:text-xl">
-            Lumen&apos;s lights are out. Train a new robot across four districts and bring them
-            back on.
+            Lumen&apos;s lights are out. Train a new robot across four districts and bring them back
+            on.
           </p>
 
           <button

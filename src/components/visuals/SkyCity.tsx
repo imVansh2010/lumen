@@ -187,7 +187,12 @@ function buildLayer({
         const roll = deco()
         const kind: RooftopKind = roll > 0.66 ? 'tank' : roll > 0.33 ? 'ac' : 'vent'
         const tw = kind === 'vent' ? 9 + Math.floor(deco() * 5) : 14 + Math.floor(deco() * 14)
-        const th = kind === 'tank' ? 20 + Math.floor(deco() * 12) : kind === 'ac' ? 12 + Math.floor(deco() * 8) : 16 + Math.floor(deco() * 10)
+        const th =
+          kind === 'tank'
+            ? 20 + Math.floor(deco() * 12)
+            : kind === 'ac'
+              ? 12 + Math.floor(deco() * 8)
+              : 16 + Math.floor(deco() * 10)
         tanks.push({
           x: x + ((k + 0.5) * w) / count - tw / 2,
           y: baseline - h - th,
