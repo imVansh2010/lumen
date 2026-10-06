@@ -12,12 +12,34 @@
       rel="icon"
       href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23050B1A'/%3E%3Ccircle cx='16' cy='14' r='7' fill='none' stroke='%23FFFFFF' stroke-width='2.5'/%3E%3Cpath d='M11 24h10' stroke='%23EF4444' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E"
     />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Fonts are self-hosted (see public/fonts). Loading them from Google
+         cost two extra third-party round trips before the real faces could
+         start downloading, which made a cold load paint in a fallback font and
+         then visibly swap. The three files are preloaded here so they are
+         already in flight while the HTML is still being parsed, and the
+         stylesheet that declares them is same-origin, so the swap is gone. -->
     <link
-      href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@500;600;700;800;900&display=swap"
-      rel="stylesheet"
+      rel="preload"
+      as="font"
+      type="font/woff2"
+      href="/fonts/orbitron-latin.woff2"
+      crossorigin
     />
+    <link
+      rel="preload"
+      as="font"
+      type="font/woff2"
+      href="/fonts/exo-2-latin.woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      as="font"
+      type="font/woff2"
+      href="/fonts/jetbrains-mono-latin.woff2"
+      crossorigin
+    />
+    <link rel="stylesheet" href="/fonts/fonts.css" />
     <title>Lumen - An interactive game to learn AI fundamentals.</title>
   </head>
   <body>
