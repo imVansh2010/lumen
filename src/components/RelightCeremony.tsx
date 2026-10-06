@@ -57,11 +57,11 @@ export default function RelightCeremony({
     <div className="relative animate-fade-in text-center">
       {districtComplete && <Confetti />}
 
-      <p className="font-display text-sm font-bold uppercase tracking-[0.3em] text-glow">
-        {districtComplete ? `${district} is fully online` : `Part ${part} of ${partCount} complete`}
+      <p className="font-mono text-xs font-medium uppercase tracking-[0.28em] text-glow/80">
+        {districtComplete ? `${district} online` : `Part ${part} of ${partCount}`}
       </p>
       <h2 className="mt-1 font-display text-3xl font-extrabold text-white sm:text-4xl">
-        {districtComplete ? 'Every light is back on!' : 'A district light just came on!'}
+        {districtComplete ? 'District back online' : 'One more light on'}
       </h2>
 
       {/* the district panel with its bulbs lighting up, left to right */}
@@ -86,7 +86,7 @@ export default function RelightCeremony({
             <Bulbs lit={lit} total={lightCount} size="lg" />
           </div>
           <p className="mt-3 font-display text-lg font-bold text-white">
-            {lit} of {lightCount} light{lightCount === 1 ? '' : 's'} back on
+            {lit} of {lightCount} lights on
           </p>
 
           {/* wire showing the spark arriving at this district */}
@@ -104,9 +104,9 @@ export default function RelightCeremony({
             />
           </div>
 
-          <p className="mt-4 inline-flex items-center gap-1.5 rounded-full border-2 border-white/20 bg-navy-950/70 px-4 py-1.5 font-display font-bold text-white">
+          <p className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-navy-950/70 px-4 py-1.5 font-mono text-sm font-medium text-white">
             <IconStar filled className="h-4 w-4 text-glow" />
-            {starsEarned} / {starsPossible} stars this part
+            {starsEarned} / {starsPossible} stars
           </p>
         </div>
       </div>
@@ -116,23 +116,18 @@ export default function RelightCeremony({
           <div className="flex items-center justify-center gap-2">
             <IconCheck className="h-6 w-6 text-glow" />
             <p className="font-display text-xl font-bold text-white">
-              {nextStationName ? `${nextStationName} unlocked!` : 'District complete!'}
+              {nextStationName ? `${nextStationName} unlocked` : 'District complete'}
             </p>
           </div>
-          <p className="mt-1 text-white/80">
-            Echo has this lesson. Every bulb in the district is glowing again — let&apos;s check
-            your score.
-          </p>
+          <p className="mt-1 text-white/80">Lesson learned. This district is back online.</p>
         </div>
       ) : (
         <div className="mt-5 rounded-3xl border-2 border-danger-500/60 bg-danger-500/10 p-5">
-          <p className="font-display text-sm font-bold uppercase tracking-widest text-danger-400">
-            Next up · {nextDifficulty}
+          <p className="font-mono text-xs font-medium uppercase tracking-[0.22em] text-danger-400">
+            Next · {nextDifficulty}
           </p>
           <p className="mt-1 font-display text-xl font-bold text-white">{nextPartTitle}</p>
-          <p className="mt-1 text-white/80">
-            This part is harder. Take your time and read every label.
-          </p>
+          <p className="mt-1 text-white/80">Harder than the last part. Take your time.</p>
         </div>
       )}
 

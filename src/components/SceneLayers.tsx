@@ -72,7 +72,7 @@ function WindowCity({ lit }: { lit: boolean }) {
   )
 }
 
-/** The cozy, dim repair shop that Bolt is built in. */
+/** The dim repair bay that the blank unit Bolt boots up in. */
 function RoomBackdrop({ windowLit = false }: { windowLit?: boolean }) {
   return (
     <div className="absolute inset-0 overflow-hidden" aria-hidden>
@@ -114,20 +114,39 @@ function RoomBackdrop({ windowLit = false }: { windowLit?: boolean }) {
         </div>
       </div>
 
-      {/* Pegboard mounted flat on the wall. The board used to hang alone in
-          the dark, which made it look like it was floating; the soft shadow
-          patch behind it anchors it to the wall. */}
+      {/* Wall diagnostic panel, mounted flat on the wall. The board used to
+          hang alone in the dark, which made it look like it was floating; the
+          soft shadow patch behind it anchors it to the wall. It carries live
+          bay readouts rather than tool stickers, so the room reads as a
+          service bay instead of a toy workshop. */}
       <div className="absolute left-[6%] top-[30%] w-[7.5rem] sm:w-[9.375rem]">
         <div className="absolute -inset-x-4 -inset-y-3 rounded-[28px] bg-navy-950/55 blur-md" />
         <div className="relative rounded-2xl border-2 border-navy-700 bg-navy-900/95 p-3 shadow-[0_18px_44px_rgba(0,0,0,0.65)]">
-          <div className="grid grid-cols-3 gap-2">
-            {['🔧', '🪛', '🔨', '🧲', '🔌', '⚙️'].map((t) => (
-              <span
-                key={t}
-                className="grid h-8 place-items-center rounded-lg border border-navy-600 bg-navy-800/80 text-base"
+          <div className="hud-label mb-2 flex items-center justify-between">
+            <span>BAY·04</span>
+            <span className="text-white/40">DIAG</span>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            {[
+              { code: 'PWR', level: 0.9 },
+              { code: 'SIG', level: 0.55 },
+              { code: 'THRM', level: 0.7 },
+              { code: 'LINK', level: 0.35 },
+            ].map((g) => (
+              <div
+                key={g.code}
+                className="rounded-lg border border-navy-600 bg-navy-800/80 px-1.5 py-1"
               >
-                {t}
-              </span>
+                <span className="block font-mono text-[0.5rem] font-medium tracking-wider text-white/55">
+                  {g.code}
+                </span>
+                <span className="mt-1 block h-1 overflow-hidden rounded-full bg-navy-950">
+                  <span
+                    className="block h-full rounded-full bg-glow/80"
+                    style={{ width: `${g.level * 100}%` }}
+                  />
+                </span>
+              </div>
             ))}
           </div>
         </div>

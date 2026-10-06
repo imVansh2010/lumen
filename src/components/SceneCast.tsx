@@ -55,23 +55,25 @@ export default function SceneCast({
     /* One column: chip, then grid, then characters. Laid out in flow so the
        location chip can never sit on top of the district cards. */
     <div className="flex w-full flex-col items-center justify-center gap-1 sm:gap-3">
-      {/* No border: `border-white/12` is not a Tailwind opacity, so the border
-          colour silently fell back to preflight's near-white default and drew a
-          thick white ring round the pill. The dark glass fill alone reads fine.
-          In the repair shop the cast sits low on the bench, so the chip rides
+      {/* Location telemetry chip: a hairline wireframe rather than a filled
+          pill, so the board reads like an instrument label instead of a sticker.
+          The `-top-*` ladder is load-bearing — it parks the chip clear of the
+          bench in the repair bay and just under the lamp in the grid scenes
+          (whose shade ends at 4rem), so it must not move.
+          In the repair bay the cast sits low on the bench, so the chip rides
           a little higher to keep clear of it.
           In the top-anchored grid scenes (plan/map) the chip sits directly
           under the hanging lamp, whose shade ends at 4rem — pulled up the old
           -top-10 it poked 8px into the shade. -top-2/-top-6 parks its top edge
           at 4.5rem on both sides of the sm breakpoint, just under the lamp. */}
       <span
-        className={`relative flex items-center rounded-full bg-navy-950/90 px-3.5 py-1.5 text-center font-display text-[0.6875rem] font-bold uppercase tracking-[0.18em] text-white/65 shadow-[0_6px_18px_rgba(0,0,0,0.45)] backdrop-blur-sm sm:text-sm ${
+        className={`relative flex items-center rounded-full border border-glow/20 bg-navy-950/85 px-3.5 py-1.5 text-center font-mono text-[0.6875rem] font-medium uppercase tracking-[0.2em] text-glow/75 shadow-[0_6px_18px_rgba(0,0,0,0.45)] backdrop-blur-sm sm:text-xs ${
           roomScene ? (showGrid ? '-top-2 sm:-top-6' : '-top-10') : '-top-6'
         }`}
       >
         {/* `-mr` cancels the trailing letter-spacing so the text sits dead
             centre in the pill and it hugs the text evenly on both sides. */}
-        <span className="-mr-[0.18em] whitespace-nowrap">{SCENE_LABELS[visual]}</span>
+        <span className="-mr-[0.2em] whitespace-nowrap">{SCENE_LABELS[visual]}</span>
       </span>
 
       {showGrid && (

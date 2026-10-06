@@ -39,19 +39,16 @@ const DIFFICULTY_STYLE: Record<Difficulty, string> = {
 
 function rank(total: number, max: number): { title: string; blurb: string } {
   const pct = max > 0 ? total / max : 0
-  if (pct >= 0.92)
-    return { title: 'Perfect Trainer!', blurb: 'Hardly a single mistake in the whole district.' }
-  if (pct >= 0.72)
-    return {
-      title: 'Great training!',
-      blurb: 'Careful and quick — Bolt learned solid examples from you.',
-    }
-  if (pct >= 0.5)
-    return { title: 'Nice work!', blurb: 'Bolt learned a lot. Careful answers earn more stars.' }
-  return {
-    title: 'Bolt learned a lot!',
-    blurb: 'Every mistake taught you something too. Try again for more stars.',
+  if (pct >= 0.92) {
+    return { title: 'Flawless run', blurb: 'No mistakes the whole way through.' }
   }
+  if (pct >= 0.72) {
+    return { title: 'Solid run', blurb: 'Bolt learned a lot from you.' }
+  }
+  if (pct >= 0.5) {
+    return { title: 'Passed', blurb: 'You got there. A few more careful picks.' }
+  }
+  return { title: 'Not quite', blurb: 'Every wrong answer taught you something. Run it again.' }
 }
 
 /* -------------------------------- Briefing --------------------------------- */
@@ -87,22 +84,22 @@ function Briefing({
         {stationName}
       </h2>
 
-      <div className="mt-5 flex flex-col items-center gap-4 rounded-3xl border-2 border-white/10 bg-navy-900/70 p-5 sm:flex-row">
+      <div className="mt-5 flex flex-col items-center gap-4 rounded-3xl border-2 border-white/10 bg-navy-900/70 p-5 sm:flex-row sm:p-6">
         <EchoOrb mood="worried" size="5.75rem" />
         <p className="text-center text-lg text-white/85 sm:text-left">
-          “Everything I learned today was jumbled and mislabelled. Train Bolt on examples you have
-          checked yourself — then he can teach me properly.”
+          “Everything I learned today is a mess. Teach Bolt with examples you&apos;ve checked, and
+          he can teach me back.”
         </p>
       </div>
 
       {/* the parts, hardest last */}
-      <div className="mt-5 space-y-3">
+      <div className="mt-5 space-y-3 sm:space-y-4">
         {parts.map((part, i) => {
           const done = i < doneParts
           return (
             <div
               key={part.id}
-              className={`flex items-start gap-3 rounded-3xl border-2 p-4 ${
+              className={`flex items-start gap-3 rounded-3xl border-2 p-4 sm:p-5 ${
                 done ? 'border-glow/40 bg-glow/10' : 'border-white/10 bg-navy-900/60'
               }`}
             >
@@ -115,7 +112,7 @@ function Briefing({
               </span>
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="font-display text-xs font-bold uppercase tracking-widest text-white/50">
+                  <span className="font-mono text-xs font-medium uppercase tracking-[0.22em] text-white/50">
                     Part {i + 1}
                   </span>
                   <span
@@ -123,7 +120,7 @@ function Briefing({
                   >
                     {part.difficulty}
                   </span>
-                  <span className="font-display text-xs font-bold uppercase tracking-widest text-white/40">
+                  <span className="font-mono text-xs font-medium uppercase tracking-[0.22em] text-white/40">
                     {part.tasks.length} tasks
                   </span>
                 </div>
@@ -135,11 +132,10 @@ function Briefing({
         })}
       </div>
 
-      <div className="panel mt-5 p-4">
+      <div className="panel mt-5 p-4 sm:p-5">
         <p className="text-white/85">
-          <span className="font-display font-bold text-white">Stars:</span> up to {STARS_PER_TASK}{' '}
-          stars per task — first-try answers earn all three. Each finished part lights one more bulb
-          in this district.
+          <span className="font-display font-bold text-white">Scoring:</span> up to {STARS_PER_TASK}{' '}
+          stars a task. First try earns all three, and each finished part lights one more light.
         </p>
       </div>
 
@@ -147,7 +143,7 @@ function Briefing({
         <button type="button" onClick={onStart} className="btn btn-primary gap-2 px-8 py-4 text-xl">
           {allDone ? <IconReplay className="h-6 w-6" /> : <IconSparkle className="h-6 w-6" />}
           {allDone
-            ? 'Play the whole station again'
+            ? 'Play it again'
             : `Start part ${Math.min(doneParts, parts.length - 1) + 1} · ${nextPart.title}`}
         </button>
         <button type="button" onClick={onBack} className="btn btn-ghost gap-2">
@@ -155,8 +151,8 @@ function Briefing({
         </button>
       </div>
       {bestStars > 0 && (
-        <p className="mt-3 text-center font-display text-sm font-bold uppercase tracking-widest text-white/50">
-          Best score here: {bestStars} / {starsPossible} stars
+        <p className="mt-3 text-center font-mono text-xs font-medium uppercase tracking-[0.22em] text-white/50">
+          Best record · {bestStars} / {starsPossible} stars
         </p>
       )}
     </div>
@@ -173,7 +169,11 @@ function LabelChip({ text, wrong }: { text: string; wrong?: boolean }) {
       }`}
     >
       <span className={wrong ? 'text-danger-400' : 'text-white/60'}>
-        {wrong ? <IconCross className="h-4 w-4" /> : <span className="text-sm">🏷️</span>}
+        {wrong ? (
+          <IconCross className="h-4 w-4" />
+        ) : (
+          <span className="block h-2 w-2 rounded-[1px] border border-white/50" aria-hidden />
+        )}
       </span>
       <span
         className={`font-display text-sm font-bold uppercase tracking-widest ${
@@ -193,7 +193,22 @@ function ItemCard({ task }: { task: Task }) {
       className="rounded-3xl border-2 border-white/15 bg-navy-900/80 p-5 text-center"
       style={{ animation: 'belt-drop 0.45s cubic-bezier(0.16, 1, 0.3, 1) both' }}
     >
-      <span className="text-7xl leading-none">{task.kind === 'cleanSet' ? '🧺' : task.emoji}</span>
+      <div className="relative mx-auto inline-flex flex-col items-center rounded-2xl border border-glow/25 bg-navy-950/60 px-5 py-1.5">
+        <span className="pointer-events-none absolute left-0 top-0 h-2.5 w-2.5 border-l-2 border-t-2 border-glow/60" />
+        <span className="pointer-events-none absolute right-0 top-0 h-2.5 w-2.5 border-r-2 border-t-2 border-glow/60" />
+        <span className="pointer-events-none absolute bottom-0 left-0 h-2.5 w-2.5 border-b-2 border-l-2 border-glow/60" />
+        <span className="pointer-events-none absolute bottom-0 right-0 h-2.5 w-2.5 border-b-2 border-r-2 border-glow/60" />
+        {task.kind === 'cleanSet' ? (
+          <span className="grid h-[4.5rem] w-[4.5rem] place-items-center rounded-xl border border-glow/30 bg-navy-900/80 font-mono text-[0.625rem] uppercase tracking-[0.2em] text-glow/80">
+            SET
+          </span>
+        ) : (
+          <span className="text-7xl leading-none">{task.emoji}</span>
+        )}
+      </div>
+      <p className="mt-1.5 font-mono text-[0.5625rem] uppercase tracking-[0.22em] text-glow/60">
+        {task.kind === 'cleanSet' ? 'dataset · unverified' : `sample ${task.id} · unverified`}
+      </p>
       <div className="mt-3 flex flex-col items-center gap-2">
         {task.kind === 'fixLabel' && <LabelChip text={task.badLabel} wrong />}
         {task.kind === 'sortCrate' && <LabelChip text={task.label} />}
@@ -207,8 +222,11 @@ function ItemCard({ task }: { task: Task }) {
         {task.kind === 'judgeClaim' && (
           <>
             <p className="max-w-md font-display text-lg font-bold text-white">“{task.claim}”</p>
-            <span className="inline-flex items-center gap-2 rounded-full border-2 border-white/25 bg-white/5 px-3 py-1 text-sm text-white/70">
-              🗣️ {task.source}
+            <span className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/5 px-3 py-1 text-sm text-white/70">
+              <span className="font-mono text-[0.625rem] uppercase tracking-[0.18em] text-glow/60">
+                source
+              </span>
+              {task.source}
             </span>
           </>
         )}
@@ -321,7 +339,7 @@ export default function StationPlayer({ stationId, progress, onBack, onSectionCo
       <div className="scanlines flex min-h-full flex-col items-center justify-center gap-4 px-6 text-center">
         <IconLock className="h-10 w-10 text-white/50" />
         <p className="font-display text-2xl font-bold text-white">
-          {station.name} is still being built.
+          {station.name} isn&apos;t ready yet.
         </p>
         <button type="button" onClick={onBack} className="btn btn-primary gap-2">
           <IconArrow dir="left" className="h-5 w-5" /> Back to the map
@@ -407,17 +425,13 @@ export default function StationPlayer({ stationId, progress, onBack, onSectionCo
     if (solved) return
     if ((task.kind === 'fixLabel' || task.kind === 'judgeClaim') && option === task.answer)
       succeed()
-    else registerMistake(option, `“${option}” does not match what is really there. Look again.`)
+    else registerMistake(option, `“${option}” isn't it. Look again.`)
   }
 
   const pickCrate = (i: 0 | 1) => {
     if (solved || task.kind !== 'sortCrate') return
     if (i === task.correctCrate) succeed()
-    else
-      registerMistake(
-        `crate-${i}`,
-        'That crate does not fit. Think about what the picture really is, not the label.',
-      )
+    else registerMistake(`crate-${i}`, 'Wrong crate. Go by the picture, not the label.')
   }
 
   const toggleTile = (i: number) => {
@@ -429,20 +443,17 @@ export default function StationPlayer({ stationId, progress, onBack, onSectionCo
   const checkSet = () => {
     if (solved || task.kind !== 'cleanSet') return
     if (selected.length === 0) {
-      setHint('Tap the examples that do not belong, then press Check.')
+      setHint('Tick the ones that do not belong, then press Check.')
       return
     }
     const wrong = selected.filter((i) => !task.oddOnes.includes(i))
     if (wrong.length > 0) {
-      registerMistake(
-        `set-${wrong.join('-')}`,
-        'Something you tapped really does belong in this set. Look again.',
-      )
+      registerMistake(`set-${wrong.join('-')}`, 'One of those actually belongs there. Look again.')
       return
     }
     if (selected.length < task.oddOnes.length) {
       sfx.click()
-      setHint('Good start! There is at least one more example that does not belong.')
+      setHint('Good start. There is at least one more.')
       setBoltMood('happy')
       return
     }
@@ -450,10 +461,10 @@ export default function StationPlayer({ stationId, progress, onBack, onSectionCo
   }
 
   const boltLine = solved
-    ? 'Beep! Saved to my memory.'
+    ? 'Logged. Stored to memory.'
     : mistakes > 0
-      ? 'Careful, Trainer. Check it again.'
-      : 'Your turn, Trainer.'
+      ? 'Check the sample again.'
+      : 'Your turn.'
 
   const taskStars = starsForTask(mistakes)
   const lightsNow = Math.max(districtLights(progress, stationId), sectionIndex + 1)
@@ -464,7 +475,7 @@ export default function StationPlayer({ stationId, progress, onBack, onSectionCo
   if (phase === 'brief') {
     return (
       <div className="scanlines flex min-h-full w-full flex-col px-4 py-6 sm:px-8">
-        <div className="m-auto w-full max-w-3xl">
+        <div className="m-auto w-full max-w-5xl">
           <Briefing
             stationName={station.name}
             lesson={station.lesson}
@@ -484,7 +495,7 @@ export default function StationPlayer({ stationId, progress, onBack, onSectionCo
   if (phase === 'relight') {
     return (
       <div className="scanlines flex min-h-full w-full flex-col px-4 py-6 sm:px-8">
-        <div className="m-auto w-full max-w-2xl">
+        <div className="m-auto w-full max-w-3xl">
           <RelightCeremony
             district={station.name}
             lit={lightsNow}
@@ -509,15 +520,15 @@ export default function StationPlayer({ stationId, progress, onBack, onSectionCo
     const nextStation = STATIONS.find((s) => s.id === stationId + 1)
     return (
       <div className="scanlines flex min-h-full w-full flex-col px-4 py-6 sm:px-8">
-        <div className="m-auto w-full max-w-3xl text-center">
+        <div className="m-auto w-full max-w-4xl text-center">
           <p className="font-display text-sm font-bold uppercase tracking-[0.3em] text-glow">
             {districtCompleteNow ? 'District online' : 'Part complete'}
           </p>
           <h2 className="mt-1 font-display text-4xl font-extrabold text-white sm:text-5xl">
-            {station.name} is online!
+            {station.name} online
           </h2>
 
-          <div className="mt-6 rounded-3xl border-2 border-white bg-white/10 p-5 shadow-glow-white">
+          <div className="mt-6 rounded-3xl border-2 border-white bg-white/10 p-5 shadow-glow-white sm:p-6">
             <div className="flex flex-wrap items-center justify-center gap-1.5">
               <IconStar filled className="h-8 w-8 text-glow" />
               <span className="font-display text-4xl font-extrabold text-white">
@@ -539,8 +550,11 @@ export default function StationPlayer({ stationId, progress, onBack, onSectionCo
           {nextStation &&
             (sectionCount(nextStation.id) > 0 ? (
               <div className="mt-5 rounded-3xl border-2 border-glow/50 bg-glow/10 p-5">
+                <p className="font-mono text-xs font-medium uppercase tracking-[0.22em] text-glow/80">
+                  Access granted
+                </p>
                 <p className="font-display text-xl font-bold text-white">
-                  🔓 {nextStation.name} unlocked!
+                  {nextStation.name} unlocked
                 </p>
                 <p className="mt-1 text-white/80">
                   {nextStation.lesson} — {nextStation.blurb}
@@ -552,14 +566,14 @@ export default function StationPlayer({ stationId, progress, onBack, onSectionCo
                   {nextStation.name} is next: {nextStation.lesson}
                 </p>
                 <p className="mt-1 text-white/80">
-                  Echo is still writing those lessons. Your lights are lit and saved until then.
+                  Echo is still writing those lessons. Your lights are safe until then.
                 </p>
               </div>
             ))}
 
           <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
             <button type="button" onClick={start} className="btn btn-ghost gap-2">
-              <IconReplay className="h-5 w-5" /> Beat your score
+              <IconReplay className="h-5 w-5" /> Try again for a better score
             </button>
             <button
               type="button"
@@ -576,7 +590,7 @@ export default function StationPlayer({ stationId, progress, onBack, onSectionCo
 
   return (
     <div className="scanlines flex min-h-full w-full flex-col px-4 py-6 sm:px-8">
-      <div className="m-auto w-full max-w-4xl">
+      <div className="m-auto w-full max-w-5xl">
         <div className="mb-4 flex items-center justify-between gap-3">
           <button
             type="button"
@@ -585,7 +599,7 @@ export default function StationPlayer({ stationId, progress, onBack, onSectionCo
           >
             <IconArrow dir="left" className="h-5 w-5" /> Map
           </button>
-          <span className="hidden font-display text-xs font-bold uppercase tracking-widest text-white/60 sm:inline sm:text-sm">
+          <span className="hidden font-mono text-xs font-medium uppercase tracking-[0.2em] text-white/60 sm:inline sm:text-sm">
             {station.name} · Part {sectionIndex + 1} of {sections.length}
           </span>
           <span className="rounded-full border-2 border-white/15 bg-navy-900/70 px-3 py-1.5 font-display text-sm font-bold text-white">
@@ -597,10 +611,10 @@ export default function StationPlayer({ stationId, progress, onBack, onSectionCo
         <div className="animate-fade-in">
           {/* progress */}
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <span className="font-display text-sm font-bold text-white/70">
+            <span className="font-body text-sm font-semibold text-white/70">
               {section.title} · task {taskIndex + 1} of {taskCount}
             </span>
-            <span className="font-display text-xs font-bold uppercase tracking-widest text-white/60">
+            <span className="font-mono text-xs font-medium uppercase tracking-[0.22em] text-white/60">
               {roundFor(task)}
             </span>
             <span className="flex items-center gap-1" title={`${taskStars} stars still possible`}>
@@ -652,7 +666,7 @@ export default function StationPlayer({ stationId, progress, onBack, onSectionCo
                     disabled={solved}
                     onClick={() => pickOption(o)}
                     aria-label={o}
-                    className={`btn min-h-[4.5rem] px-4 py-4 text-base sm:text-lg ${
+                    className={`btn font-body min-h-[4.5rem] px-4 py-4 text-base sm:text-lg ${
                       isRight
                         ? 'border-2 border-white bg-white text-navy-950'
                         : isWrong
@@ -689,7 +703,9 @@ export default function StationPlayer({ stationId, progress, onBack, onSectionCo
                     }`}
                     style={isWrong ? { animation: 'nope 0.45s ease-in-out' } : undefined}
                   >
-                    <span className="text-4xl leading-none">📦</span>
+                    <span className="font-mono text-[0.6875rem] font-medium uppercase tracking-[0.22em] text-glow/70">
+                      Crate {i === 0 ? 'A' : 'B'}
+                    </span>
                     {crate}
                     {isRight && <IconCheck className="h-5 w-5" />}
                   </button>
@@ -711,8 +727,8 @@ export default function StationPlayer({ stationId, progress, onBack, onSectionCo
               </div>
               <p className="mt-2 text-center text-sm text-white/60">
                 {solved
-                  ? `You found all ${task.oddOnes.length} odd one${task.oddOnes.length > 1 ? 's' : ''} out.`
-                  : `Tapped ${selected.length} picture${selected.length === 1 ? '' : 's'} — press Check when you are done.`}
+                  ? `Found all ${task.oddOnes.length} of them.`
+                  : `${selected.length} picked. Press Check when you're ready.`}
               </p>
               {!solved && (
                 <div className="mt-3 flex justify-center">
@@ -721,7 +737,7 @@ export default function StationPlayer({ stationId, progress, onBack, onSectionCo
                     onClick={checkSet}
                     className="btn btn-primary gap-2 px-7 py-3 text-lg"
                   >
-                    <IconCheck className="h-5 w-5" /> Check my answers
+                    <IconCheck className="h-5 w-5" /> Check answers
                   </button>
                 </div>
               )}
@@ -735,7 +751,7 @@ export default function StationPlayer({ stationId, progress, onBack, onSectionCo
                 <div className="flex items-center gap-2">
                   <IconCheck className="h-6 w-6 text-glow" />
                   <span className="font-display text-xl font-bold text-white">
-                    {task.kind === 'cleanSet' ? 'Set cleaned!' : 'Correct!'} Bolt learned it.
+                    {task.kind === 'cleanSet' ? 'All cleaned up.' : 'Correct.'} Bolt saved it.
                   </span>
                   <span className="ml-auto flex items-center gap-1 font-display font-bold text-white">
                     {Array.from({ length: taskStars }, (_, i) => (
@@ -760,13 +776,13 @@ export default function StationPlayer({ stationId, progress, onBack, onSectionCo
                 style={{ animation: 'fade-in 0.25s ease-out both' }}
               >
                 <p className="font-display text-lg font-bold text-danger-400">
-                  Not quite — try again
+                  Not quite. Have another go.
                 </p>
                 <p className="mt-1 text-white/85">{hint}</p>
               </div>
             ) : (
-              <div className="rounded-3xl border-2 border-white/10 bg-navy-900/50 p-4 text-center text-white/60 sm:p-5">
-                Take your time. A wrong tap only costs a star, never the game.
+              <div className="rounded-3xl border border-white/10 bg-navy-900/50 p-4 text-center font-mono text-xs uppercase tracking-[0.18em] text-white/50 sm:p-5">
+                A wrong pick costs a star, never the run
               </div>
             )}
           </div>

@@ -24,10 +24,10 @@ export default function StationMap({ progress, onOpenStation, onReplayIntro }: P
 
   return (
     <div className="scanlines flex min-h-full w-full flex-col px-4 py-8 sm:px-8">
-      <div className="m-auto w-full max-w-5xl">
+      <div className="m-auto w-full max-w-6xl">
         <div className="text-center">
-          <p className="font-display text-sm font-bold uppercase tracking-[0.3em] text-glow">
-            Power level · {lightsOn} of {lightsTotal} lights back on
+          <p className="font-mono text-xs font-medium uppercase tracking-[0.3em] text-glow sm:text-sm">
+            {lightsOn} of {lightsTotal} lights back on
           </p>
           <div className="mx-auto mt-2 flex w-full max-w-md items-center gap-2">
             <span className="h-2.5 flex-1 overflow-hidden rounded-full bg-white/15">
@@ -37,12 +37,11 @@ export default function StationMap({ progress, onOpenStation, onReplayIntro }: P
               />
             </span>
           </div>
-          <h2 className="mt-3 font-display text-4xl font-extrabold text-white sm:text-5xl">
-            Choose a station
+          <h2 className="mt-3 font-display text-4xl font-extrabold uppercase tracking-wide text-white sm:text-5xl">
+            Select a district
           </h2>
           <p className="mx-auto mt-2 max-w-xl text-balance text-lg text-white/75">
-            Each part you finish lights one more bulb in that district. Light up a whole district to
-            open the next station.
+            Finish every part in a district to unlock the next one.
           </p>
         </div>
 
@@ -104,12 +103,12 @@ export default function StationMap({ progress, onOpenStation, onReplayIntro }: P
 
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
-                      <span className="font-display text-xs font-bold uppercase tracking-widest text-white/50">
+                      <span className="font-mono text-xs font-medium uppercase tracking-widest text-glow/60">
                         Station {s.id}
                       </span>
                       {!unlocked && <IconLock className="h-4 w-4 text-white/40" />}
                       {online && (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-glow/20 px-2 py-0.5 font-display text-[0.625rem] font-bold uppercase tracking-widest text-glow">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-glow/20 px-2 py-0.5 font-mono text-[0.625rem] font-medium uppercase tracking-widest text-glow">
                           <IconCheck className="h-3.5 w-3.5" /> Online
                         </span>
                       )}
@@ -121,13 +120,13 @@ export default function StationMap({ progress, onOpenStation, onReplayIntro }: P
                     <p className="mt-2 text-white/75">{unlocked ? s.blurb : hint}</p>
 
                     {unlocked && (
-                      <div className="mt-3 flex flex-wrap items-center gap-3">
+                      <div className="mt-3.5 flex flex-wrap items-center gap-x-4 gap-y-2">
                         <Bulbs lit={lights} total={total || LIGHTS_PER_DISTRICT} />
-                        <span className="font-display text-xs font-bold uppercase tracking-widest text-white/60">
+                        <span className="font-mono text-xs font-medium uppercase tracking-widest text-white/60">
                           {online ? 'all lights on' : `${lights} of ${total} lights`}
                         </span>
                         {max > 0 && (
-                          <span className="font-display text-xs font-bold uppercase tracking-widest text-white/45">
+                          <span className="font-mono text-xs font-medium uppercase tracking-widest text-white/45">
                             best {stars} / {max} stars
                           </span>
                         )}
@@ -154,7 +153,7 @@ export default function StationMap({ progress, onOpenStation, onReplayIntro }: P
 
         <div className="mt-8 flex justify-center">
           <button type="button" onClick={onReplayIntro} className="btn btn-ghost gap-2">
-            <IconReplay className="h-5 w-5" /> Watch the story again
+            <IconReplay className="h-5 w-5" /> Replay the briefing
           </button>
         </div>
       </div>

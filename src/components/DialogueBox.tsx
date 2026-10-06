@@ -7,7 +7,8 @@ interface Props {
   glitchy: boolean
   /**
    * True when the line belongs to the player. Trainer lines get their own
-   * outline and a touch more room, so a kid instantly recognizes their line.
+   * outline and a touch more room, so the player instantly recognizes their
+   * own transmission.
    * The variant lives in CSS (`.dialogue-box--trainer`) rather than as a pile
    * of conditional utilities: two Tailwind classes that set the same property
    * are resolved by stylesheet order, not by their order in the class list, so
@@ -26,8 +27,8 @@ export default function DialogueBox({ speaker, shown, done, glitchy, trainer }: 
         <span className={`dialogue-speaker font-display font-bold tracking-wide ${speaker.accent}`}>
           {speaker.name}
         </span>
-        <span className="ml-auto font-display text-xs font-bold uppercase tracking-widest text-white/45">
-          {done ? 'tap to continue ▸' : 'tap to skip typing'}
+        <span className="hud-label ml-auto text-white/40">
+          {done ? 'Advance ▸' : 'Transmitting…'}
         </span>
       </div>
 

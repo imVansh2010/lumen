@@ -32,7 +32,7 @@ export function StoryTopBar({ onSkip, sound, onToggleSound }: TopBarProps) {
             e.stopPropagation()
             onSkip()
           }}
-          className="btn btn-ghost gap-1.5 px-3 py-2 text-base sm:px-4"
+          className="btn btn-ghost gap-1.5 px-3 py-2 text-xs uppercase tracking-widest sm:px-4"
           aria-label="Skip the story and go to the stations"
         >
           <IconSkip className="h-5 w-5" /> <span className="hidden sm:inline">Skip</span>
@@ -84,19 +84,17 @@ export function StoryControls({
       </button>
 
       <div className="pointer-events-none hidden flex-col items-center gap-1.5 sm:flex">
-        <span className="font-display text-sm font-bold tracking-wide text-white/70">
-          {chapter}
-        </span>
+        <span className="hud-label text-xs text-white/65">{chapter}</span>
         <div className="flex items-center gap-1.5">
           {Array.from({ length: chapterCount }, (_, i) => (
             <span
               key={i}
-              className={`h-2.5 rounded-full transition-all ${
+              className={`h-1.5 rounded-sm transition-all ${
                 i === chapterIndex
-                  ? 'w-7 bg-white'
+                  ? 'w-8 bg-glow'
                   : i < chapterIndex
-                    ? 'w-2.5 bg-white/60'
-                    : 'w-2.5 bg-white/20'
+                    ? 'w-3 bg-glow/60'
+                    : 'w-3 bg-white/15'
               }`}
             />
           ))}

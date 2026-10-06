@@ -1,8 +1,8 @@
 /* Task model shared by every station.
 
-   A station is made of sections ("parts"). Each finished section lights one
-   more bulb in that district, so difficulty ramps up part by part instead of
-   dropping the player into one long quiz. */
+   A station is made of parts. Each finished part lights one more bulb in that
+   district, so the difficulty climbs a step at a time instead of dropping you
+   into one long quiz. */
 
 export interface FixLabelTask {
   kind: 'fixLabel'
@@ -81,7 +81,7 @@ export function maxStarsFor(sections: Section[]): number {
 /** Big prompt shown above the choices. */
 export function promptFor(task: Task): string {
   if (task.kind === 'cleanSet') {
-    return `Tap every picture that does NOT belong in “${task.label}”`
+    return `Tick every picture that does not belong in “${task.label}”`
   }
   return task.question
 }
@@ -89,11 +89,11 @@ export function promptFor(task: Task): string {
 export function roundFor(task: Task): string {
   switch (task.kind) {
     case 'fixLabel':
-      return 'Fix the wrong label'
+      return 'Fix the label'
     case 'sortCrate':
       return 'Check the label, then sort'
     case 'cleanSet':
-      return 'Clean the example set'
+      return 'Clean up the examples'
     case 'judgeClaim':
       return 'Check the claim'
   }

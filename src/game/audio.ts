@@ -97,11 +97,19 @@ function noiseHit(
   src.stop(t0 + dur + 0.05)
 }
 
+/** A cold, glassy strain: a sine with a lightly detuned octave partial on top,
+    so a UI cue reads as synthetic rather than as a nursery chime. */
+function glassTone(freq: number, start: number, dur: number, vol: number): void {
+  tone(freq, start, dur, 'sine', vol)
+  tone(freq * 2.01, start, Math.max(0.06, dur * 0.6), 'sine', vol * 0.3)
+}
+
 let lastTick = 0
 
 export const sfx = {
   click() {
-    tone(620, 0, 0.06, 'square', 0.03)
+    tone(760, 0, 0.045, 'square', 0.022)
+    tone(1520, 0.008, 0.05, 'sine', 0.013)
   },
   /** Soft keys tick while the story types itself out (throttled). */
   type() {
@@ -117,15 +125,15 @@ export const sfx = {
   },
   chime() {
     duckMusic(1.0)
-    tone(659.25, 0, 0.25, 'sine', 0.06)
-    tone(987.77, 0.08, 0.3, 'sine', 0.05)
-    tone(1318.51, 0.17, 0.36, 'sine', 0.04)
+    glassTone(587.33, 0, 0.3, 0.05)
+    glassTone(880.0, 0.09, 0.34, 0.04)
+    glassTone(1174.66, 0.18, 0.4, 0.03)
   },
   upload() {
     duckMusic(0.9)
-    tone(523.25, 0, 0.08, 'triangle', 0.05)
-    tone(783.99, 0.07, 0.1, 'triangle', 0.05)
-    tone(1046.5, 0.15, 0.14, 'sine', 0.04)
+    glassTone(587.33, 0, 0.09, 0.045)
+    glassTone(880.0, 0.07, 0.11, 0.042)
+    glassTone(1174.66, 0.15, 0.16, 0.034)
   },
   alarm() {
     duckMusic(0.9)
@@ -149,13 +157,16 @@ export const sfx = {
   },
   boot() {
     duckMusic(1.0)
-    tone(220, 0, 0.25, 'sine', 0.05, 520)
-    tone(660, 0.24, 0.2, 'triangle', 0.05)
+    // a low servo winding up, then one clean glass strike as the unit comes on
+    tone(150, 0, 0.34, 'sawtooth', 0.03, 560)
+    tone(75, 0.02, 0.36, 'sine', 0.05, 280)
+    glassTone(660, 0.26, 0.3, 0.045)
   },
   success() {
     duckMusic(1.6)
-    ;[392, 523.25, 659.25, 783.99].forEach((f, i) => tone(f, i * 0.09, 0.22, 'triangle', 0.06))
-    tone(1046.5, 0.36, 0.4, 'sine', 0.05)
+    // open fifths rather than a major arpeggio — lifted, not nursery-bright
+    ;[587.33, 880.0, 1174.66].forEach((f, i) => glassTone(f, i * 0.1, 0.26, 0.05))
+    glassTone(1567.98, 0.34, 0.44, 0.038)
   },
   /** Gentle "not quite" for wrong answers — never scary. */
   nudge() {
@@ -165,8 +176,8 @@ export const sfx = {
   /** A picture lands in the right crate. */
   sort() {
     duckMusic(0.6)
-    tone(523.25, 0, 0.14, 'triangle', 0.05, 880)
-    tone(880, 0.14, 0.22, 'sine', 0.045, 1174.66)
+    tone(660, 0, 0.08, 'triangle', 0.04, 990)
+    glassTone(990, 0.09, 0.26, 0.045)
   },
   /** District 0-3 shutting down, left to right: a relay clacks, the line drains
       away, and each district lands a little lower and heavier than the last. */
@@ -180,55 +191,70 @@ export const sfx = {
   },
   /** One light coming back on — brighter for each light in a district. */
   lightOn(step = 0) {
-    tone(523.25 + step * 130.81, 0, 0.22, 'sine', 0.055)
-    tone(1046.5 + step * 261.63, 0.06, 0.28, 'sine', 0.03)
+    glassTone(587.33 + step * 146.83, 0, 0.26, 0.05)
+    glassTone(1174.66 + step * 293.66, 0.05, 0.3, 0.028)
   },
   /** A whole station finished — small fanfare. */
   fanfare() {
     duckMusic(1.8)
-    ;[392, 523.25, 659.25, 1046.5].forEach((f, i) => tone(f, i * 0.12, 0.3, 'triangle', 0.06))
-    tone(1567.98, 0.5, 0.5, 'sine', 0.05)
+    ;[587.33, 880.0, 1174.66].forEach((f, i) => glassTone(f, i * 0.12, 0.32, 0.05))
+    glassTone(1760.0, 0.46, 0.55, 0.034)
   },
 }
 
 /* -------------------------------- Music ---------------------------------- */
 
-/* The score is written for the *feeling of the game*, not a genre: a quiet sky
-   city where a friendly machine is slowly learning to think. So there are no
-   drums and no tune to whistle — just a wide, slowly-breathing chord bed, a
-   steady "thinking" pulse like a machine quietly counting, and a few glass
-   bells for wonder. Hopeful, a little wistful, never busy and never scary. */
-const BAR = 5.0
+/* The score is written for the *feeling of the world*, not a genre. Lumen is a
+   cold, enormous machine-city that is quietly thinking, so the bed is built
+   from evolving textures rather than a tune: a deep sub drone that never sits
+   still, wide detuned pads, a dry 16-step "processing" grid ticking like a
+   system working through a task, and a sparse FM-bell motif for the
+   intelligence watching it all. Deliberately no drums, no arpeggio chase and
+   no theremin glide — this future is calm and precise, not cartoon sci-fi. */
+
+/** Slow enough that each chord is a place you sit in, not a beat you tap. */
+const BAR = 4.8
+/** Sixteenth-note grid inside one bar — the machine's processing pulse. */
+const STEP = BAR / 16
+
+/* Open, add9-ish voicings: fifths and added seconds left unresolved so the
+   harmony reads vast rather than sentimental. The low voice is the root an
+   octave below the pad. */
 const CHORDS: number[][] = [
-  [73.42, 220.0, 277.18, 329.63], // D   — home, open sky
-  [61.74, 185.0, 246.94, 293.66], // Bm  — wistful, searching
-  [98.0, 196.0, 246.94, 293.66], // G   — warm lift, hope
-  [61.74, 164.81, 220.0, 246.94], // Asus — soft tension, pulls back home
+  [73.42, 220.0, 329.63, 369.99, 554.37], // Dmaj9  — home, open sky
+  [61.74, 185.0, 246.94, 277.18, 440.0], // Bm9    — searching, unsettled
+  [98.0, 196.0, 246.94, 293.66, 392.0], // Gmaj9  — lift, resolve outward
+  [55.0, 164.81, 246.94, 329.63, 415.3], // Asus   — suspension, pulls home
 ]
 
-/* A handful of glass bells per bar, in D major pentatonic. Sparse on purpose:
-   the space between the notes is what makes the city feel big. Positions are
-   in beats. */
-const MOTIF: { at: number; f: number }[][] = [
+/* The signature: a few FM bells per bar in D major pentatonic, sparse on
+   purpose — the silence between them is what makes the city feel big.
+   Positions are in beats; `v` is that note's own level. */
+const MOTIF: { at: number; f: number; v: number }[][] = [
   [
-    { at: 0, f: 587.33 },
-    { at: 2, f: 739.99 },
-    { at: 3, f: 880.0 },
+    { at: 0, f: 587.33, v: 0.02 },
+    { at: 2.5, f: 739.99, v: 0.014 },
+    { at: 3.5, f: 880.0, v: 0.017 },
   ],
   [
-    { at: 1, f: 659.25 },
-    { at: 2.5, f: 587.33 },
+    { at: 1, f: 659.25, v: 0.016 },
+    { at: 3, f: 587.33, v: 0.013 },
   ],
   [
-    { at: 0.5, f: 880.0 },
-    { at: 2, f: 739.99 },
-    { at: 3.25, f: 987.77 },
+    { at: 0.5, f: 880.0, v: 0.017 },
+    { at: 2, f: 739.99, v: 0.014 },
+    { at: 3.25, f: 987.77, v: 0.012 },
   ],
   [
-    { at: 1, f: 880.0 },
-    { at: 3, f: 587.33 },
+    { at: 1, f: 880.0, v: 0.015 },
+    { at: 2.75, f: 587.33, v: 0.012 },
   ],
 ]
+
+/* Which of the sixteen steps carry the dry processing tick — a regular count
+   with an accent on the downbeat and the midpoint. */
+const PULSE_STEPS = [0, 2, 4, 6, 8, 10, 12, 14]
+const PULSE_ACCENT = new Set([0, 8])
 
 interface Music {
   gain: GainNode
@@ -276,25 +302,26 @@ export function clearHush(): void {
   p.linearRampToValueAtTime(MUSIC_FULL, now + 0.7)
 }
 
-/** A wide, slowly-breathing pad. Two slightly detuned voices give it a soft
-    choral width — that is what makes the sky feel like it is moving. */
+/** A wide, cold pad. Two slightly detuned triangle voices per note through a
+    gentle lowpass: the shimmer between the detunes keeps the space alive
+    without any melody doing the work. */
 function pad(freq: number, t: number, dur: number, vol: number, dest: AudioNode): void {
   const c = ac()
   if (!c || !enabled) return
   const g = c.createGain()
   const filter = c.createBiquadFilter()
   filter.type = 'lowpass'
-  filter.frequency.value = 1150
-  const voices = [-5, 5]
-  const attack = Math.min(2.0, dur * 0.4)
-  const release = Math.min(1.7, dur * 0.34)
+  filter.frequency.value = 900
+  filter.Q.value = 0.7
+  const attack = Math.min(2.6, dur * 0.42)
+  const release = Math.min(2.0, dur * 0.34)
   g.gain.setValueAtTime(0.0001, t)
   g.gain.linearRampToValueAtTime(vol, t + attack)
   g.gain.setValueAtTime(vol, Math.max(t + attack + 0.05, t + dur - release))
   g.gain.exponentialRampToValueAtTime(0.0001, t + dur)
   filter.connect(g)
   g.connect(dest)
-  voices.forEach((detune) => {
+  ;[-7, 7].forEach((detune) => {
     const osc = c.createOscillator()
     osc.type = 'triangle'
     osc.frequency.value = freq
@@ -305,20 +332,45 @@ function pad(freq: number, t: number, dur: number, vol: number, dest: AudioNode)
   })
 }
 
-function pluck(freq: number, t: number, dur: number, vol: number, dest: AudioNode): void {
+/** The floor of the mix: two detuned saws behind a lowpass whose cutoff drifts
+    on a very slow LFO. It never plays a riff — it just breathes, so the world
+    underneath never feels static. */
+function subDrone(freq: number, t: number, dur: number, vol: number, dest: AudioNode): void {
   const c = ac()
   if (!c || !enabled) return
-  const osc = c.createOscillator()
   const g = c.createGain()
-  osc.type = 'sine'
-  osc.frequency.value = freq
+  const filter = c.createBiquadFilter()
+  filter.type = 'lowpass'
+  filter.Q.value = 2.4
+  filter.frequency.setValueAtTime(160, t)
+  filter.frequency.linearRampToValueAtTime(320, t + dur * 0.5)
+  filter.frequency.linearRampToValueAtTime(150, t + dur)
+  const lfo = c.createOscillator()
+  const lfoGain = c.createGain()
+  lfo.type = 'sine'
+  lfo.frequency.value = 0.055
+  lfoGain.gain.value = 70
+  lfo.connect(lfoGain)
+  lfoGain.connect(filter.frequency)
+  const attack = Math.min(3.0, dur * 0.45)
+  const release = Math.min(2.2, dur * 0.32)
   g.gain.setValueAtTime(0.0001, t)
-  g.gain.exponentialRampToValueAtTime(vol, t + 0.03)
+  g.gain.linearRampToValueAtTime(vol, t + attack)
+  g.gain.setValueAtTime(vol, Math.max(t + attack + 0.05, t + dur - release))
   g.gain.exponentialRampToValueAtTime(0.0001, t + dur)
-  osc.connect(g)
+  filter.connect(g)
   g.connect(dest)
-  osc.start(t)
-  osc.stop(t + dur + 0.05)
+  ;[-4, 4].forEach((detune) => {
+    const osc = c.createOscillator()
+    osc.type = 'sawtooth'
+    osc.frequency.value = freq
+    osc.detune.value = detune
+    osc.connect(filter)
+    osc.start(t)
+    osc.stop(t + dur + 0.05)
+  })
+  lfo.start(t)
+  lfo.stop(t + dur + 0.05)
 }
 
 let noiseBuffer: AudioBuffer | null = null
@@ -334,69 +386,115 @@ function noise(): AudioBuffer | null {
   return noiseBuffer
 }
 
-/** A single glass bell. A soft sine plus a faster-decaying octave partial gives
-    it a clean, icy shimmer without ever sounding like a music box. */
-function bell(freq: number, t: number, vol: number, dest: AudioNode): void {
+/** An FM bell: a sine carrier whose frequency is pushed by a fast sine
+    modulator, with the modulation index decaying so the strike is metallic and
+    the tail rings pure. Glassy and unmistakably synthetic — the score's
+    signature timbre, never a music box. */
+function fmBell(
+  freq: number,
+  t: number,
+  vol: number,
+  dest: AudioNode,
+  ratio = 2.01,
+  index = 240,
+): void {
   const c = ac()
   if (!c || !enabled) return
-  const dur = 3.6
+  const dur = 3.2
+  const carrier = c.createOscillator()
+  const modulator = c.createOscillator()
+  const modGain = c.createGain()
   const g = c.createGain()
-  const partial = c.createGain()
-  partial.gain.value = 0.3
+  carrier.type = 'sine'
+  carrier.frequency.value = freq
+  modulator.type = 'sine'
+  modulator.frequency.value = freq * ratio
+  modGain.gain.setValueAtTime(index, t)
+  modGain.gain.exponentialRampToValueAtTime(1, t + 0.5)
   g.gain.setValueAtTime(0.0001, t)
-  g.gain.exponentialRampToValueAtTime(vol, t + 0.02)
+  g.gain.exponentialRampToValueAtTime(vol, t + 0.015)
   g.gain.exponentialRampToValueAtTime(0.0001, t + dur)
-  const base = c.createOscillator()
-  base.type = 'sine'
-  base.frequency.value = freq
-  const octave = c.createOscillator()
-  octave.type = 'sine'
-  octave.frequency.value = freq * 2.01
-  base.connect(g)
-  octave.connect(partial)
-  partial.connect(g)
+  modulator.connect(modGain)
+  modGain.connect(carrier.frequency)
+  carrier.connect(g)
   g.connect(dest)
-  base.start(t)
-  octave.start(t)
-  base.stop(t + dur + 0.05)
-  octave.stop(t + dur + 0.05)
+  carrier.start(t)
+  modulator.start(t)
+  carrier.stop(t + dur + 0.05)
+  modulator.stop(t + dur + 0.05)
 }
 
-/** The thinking pulse: a very soft, even blip on the beat — Echo quietly
-    ticking over. Almost subliminal, but it is what makes the loop feel alive. */
-function tick(t: number, vol: number, dest: AudioNode): void {
-  const c = ac()
-  if (!c || !enabled) return
-  const osc = c.createOscillator()
-  const g = c.createGain()
-  osc.type = 'sine'
-  osc.frequency.value = 1567.98
-  g.gain.setValueAtTime(0.0001, t)
-  g.gain.exponentialRampToValueAtTime(vol, t + 0.005)
-  g.gain.exponentialRampToValueAtTime(0.0001, t + 0.15)
-  osc.connect(g)
-  g.connect(dest)
-  osc.start(t)
-  osc.stop(t + 0.19)
-}
-
-/** A slow breath of filtered air under each bar, so the sky never feels static. */
-function wind(t: number, dur: number, vol: number, dest: AudioNode): void {
+/** The processing pulse: a dry, bandpassed click on the grid, with no low end
+    at all. It reads as a system stepping through work, not as percussion. */
+function pulse(t: number, vol: number, dest: AudioNode, accent = false): void {
   const c = ac()
   const buf = noise()
   if (!c || !buf || !enabled) return
   const src = c.createBufferSource()
   src.buffer = buf
   src.loop = true
-  const lp = c.createBiquadFilter()
-  lp.type = 'lowpass'
-  lp.frequency.value = 650
+  const bp = c.createBiquadFilter()
+  bp.type = 'bandpass'
+  bp.frequency.value = accent ? 2400 : 3200
+  bp.Q.value = 6
+  const g = c.createGain()
+  const dur = accent ? 0.06 : 0.035
+  g.gain.setValueAtTime(0.0001, t)
+  g.gain.exponentialRampToValueAtTime(vol, t + 0.004)
+  g.gain.exponentialRampToValueAtTime(0.0001, t + dur)
+  src.connect(bp)
+  bp.connect(g)
+  g.connect(dest)
+  src.start(t)
+  src.stop(t + dur + 0.03)
+}
+
+/** A short digital pluck: a sine with a fast decay and a small downward pitch
+    drop. Precise — no body, no reverb. */
+function pluck(freq: number, t: number, dur: number, vol: number, dest: AudioNode): void {
+  const c = ac()
+  if (!c || !enabled) return
+  const osc = c.createOscillator()
+  const g = c.createGain()
+  osc.type = 'sine'
+  osc.frequency.setValueAtTime(freq, t)
+  osc.frequency.exponentialRampToValueAtTime(freq * 0.985, t + dur)
+  g.gain.setValueAtTime(0.0001, t)
+  g.gain.exponentialRampToValueAtTime(vol, t + 0.012)
+  g.gain.exponentialRampToValueAtTime(0.0001, t + dur)
+  osc.connect(g)
+  g.connect(dest)
+  osc.start(t)
+  osc.stop(t + dur + 0.05)
+}
+
+/** A filtered-noise swell whose band climbs as it opens. Used once per phrase
+    as a transition, never as a "whoosh" effect. */
+function swell(
+  t: number,
+  dur: number,
+  vol: number,
+  dest: AudioNode,
+  from: number,
+  to: number,
+): void {
+  const c = ac()
+  const buf = noise()
+  if (!c || !buf || !enabled) return
+  const src = c.createBufferSource()
+  src.buffer = buf
+  src.loop = true
+  const bp = c.createBiquadFilter()
+  bp.type = 'bandpass'
+  bp.Q.value = 1.1
+  bp.frequency.setValueAtTime(from, t)
+  bp.frequency.exponentialRampToValueAtTime(to, t + dur)
   const g = c.createGain()
   g.gain.setValueAtTime(0.0001, t)
-  g.gain.linearRampToValueAtTime(vol, t + dur * 0.45)
+  g.gain.linearRampToValueAtTime(vol, t + dur * 0.7)
   g.gain.linearRampToValueAtTime(0.0001, t + dur)
-  src.connect(lp)
-  lp.connect(g)
+  src.connect(bp)
+  bp.connect(g)
   g.connect(dest)
   src.start(t)
   src.stop(t + dur + 0.05)
@@ -406,25 +504,30 @@ function scheduleBar(bar: number, t: number, dest: AudioNode): void {
   const chord = CHORDS[bar % CHORDS.length]
   const beat = BAR / 4
 
-  // One wide, slowly-breathing chord holds the whole bar — smooth and weightless,
-  // with the low root carried a touch louder so it still feels grounded.
-  chord.forEach((f, i) => pad(f, t, BAR + 1.3, i === 0 ? 0.028 : 0.012, dest))
-  wind(t, BAR * 0.95, 0.005, dest)
+  // Foundation: the sub drone grounds the bar, the detuned pads open the space.
+  subDrone(chord[0], t, BAR + 1.8, 0.026, dest)
+  chord.slice(1).forEach((f, i) => pad(f, t, BAR + 1.3, i === 0 ? 0.016 : 0.0085, dest))
 
-  // A soft low thumb on the downbeat, just enough to give the bar a heartbeat.
-  pluck(chord[0], t, 2.4, 0.03, dest)
+  // The processing grid: a dry count across the bar. Quiet enough to be felt
+  // more than heard, so it never turns into a beat to dance to.
+  PULSE_STEPS.forEach((s) =>
+    pulse(t + s * STEP, PULSE_ACCENT.has(s) ? 0.0075 : 0.0035, dest, PULSE_ACCENT.has(s)),
+  )
 
-  // The thinking pulse — four even, almost-subliminal blips per bar.
-  for (let i = 0; i < 4; i++) tick(t + i * beat, i % 2 === 0 ? 0.007 : 0.0045, dest)
+  // The motif: sparse FM bells ringing out over the pads.
+  MOTIF[bar % MOTIF.length].forEach(({ at, f, v }) => fmBell(f, t + at * beat, v, dest))
 
-  // A few glass bells for wonder, sparse and ringing out over the pad.
-  MOTIF[bar % MOTIF.length].forEach(({ at, f }) => bell(f, t + at * beat, 0.02, dest))
+  // Every other bar, one low inharmonic blip as a distant sonar ping — the
+  // world noticing something. Kept rare so it always lands.
+  if (bar % 2 === 0) fmBell(chord[0] * 2, t + 0.06, 0.012, dest, 3.5, 340)
 
-  // On the tense bar, a quiet ascending run of data clicks, like the city
-  // thinking through the problem and finding its way home.
+  // Resolving run on the phrase-closing bar: a short rising sequence of dry
+  // digital plucks, like the system working a problem and finding the answer,
+  // under a single gentle swell. This is the score's own signature.
   if (bar % 4 === 3) {
     const run = [587.33, 659.25, 739.99, 880.0, 987.77, 1174.66]
-    run.forEach((f, i) => pluck(f, t + beat * (2.5 + i * 0.22), 1.4, 0.008, dest))
+    run.forEach((f, i) => pluck(f, t + beat * (2.0 + i * 0.24), 1.3, 0.0085, dest))
+    swell(t + BAR * 0.35, BAR * 0.62, 0.011, dest, 260, 3600)
   }
 }
 

@@ -97,10 +97,10 @@ export default function PowerGrid({
               key={s.id}
               /* During the blackout each card holds its charge, surges, then
                  fizzles out on its own delayed beat — matching the sound. */
-              className={`rounded-2xl border-2 px-2 py-2 text-center transition-colors ${
+              className={`rounded-xl border px-2.5 py-2 text-center transition-colors ${
                 online
-                  ? 'border-white/60 bg-white/10 shadow-glow-white'
-                  : 'border-white/10 bg-navy-900/80'
+                  ? 'border-glow/60 bg-glow/10 shadow-glow-white'
+                  : 'border-white/15 bg-navy-900/70'
               }`}
               style={
                 shutdown
@@ -110,21 +110,21 @@ export default function PowerGrid({
                   : undefined
               }
             >
-              <div className="font-display text-xs font-bold leading-tight text-white sm:text-sm">
+              <div className="font-display text-[0.6875rem] font-semibold uppercase leading-tight tracking-[0.1em] text-white sm:text-xs">
                 {s.name}
               </div>
               <div className="my-1.5">
                 <Bulbs lit={lit} />
               </div>
               <div
-                className={`text-[0.625rem] font-bold uppercase tracking-widest ${
+                className={`font-mono text-[0.625rem] font-medium uppercase tracking-[0.18em] ${
                   online ? 'text-glow' : lit > 0 ? 'text-white/70' : 'text-white/45'
                 }`}
               >
                 {online
                   ? 'online'
                   : lit > 0
-                    ? `${lit} of ${LIGHTS_PER_DISTRICT} lights`
+                    ? `${lit}/${LIGHTS_PER_DISTRICT} online`
                     : 'no power'}
               </div>
             </div>

@@ -45,48 +45,50 @@ export default function TitleScreen({ onPlay, onSkipToStations, sound, onToggleS
             </div>
           </div>
 
+          <p className="hud-label mb-3 text-glow/80">Sky-city operations</p>
+
           <h1
-            className="animate-pop-in bg-gradient-to-b from-white via-white to-glow bg-clip-text font-body text-[clamp(3.25rem,13vw,7.5rem)] font-black leading-none tracking-[0.05em] text-transparent"
+            className="animate-pop-in bg-gradient-to-b from-white via-white to-glow bg-clip-text font-display text-[clamp(3.25rem,13vw,7.5rem)] font-black leading-none tracking-[0.06em] text-transparent"
             style={{ filter: 'drop-shadow(0 4px 24px rgba(156,200,255,0.45))' }}
           >
             LUMEN
           </h1>
 
           <p
-            className="mt-4 font-display text-2xl font-bold tracking-wide text-danger-400 sm:text-3xl"
+            className="mt-5 font-mono text-sm font-medium uppercase tracking-[0.35em] text-danger-400 sm:text-base"
             style={{ textShadow: '0 0 20px rgba(239,68,68,0.4)' }}
           >
             Teaching AI to think
           </p>
 
           <p className="mt-5 max-w-xl text-balance text-lg font-semibold leading-snug text-white/85 sm:text-xl">
-            Echo&apos;s sky-city lost its power. Guide Bolt through four districts to learn how AI
-            thinks — and bring the lights back on.
+            Lumen&apos;s lights are out. Train a new robot across four districts and bring them
+            back on.
           </p>
 
           <button
             type="button"
             onClick={onPlay}
             className="btn btn-primary mt-9 w-full max-w-md gap-3 whitespace-nowrap px-10 py-5 text-2xl sm:w-auto sm:px-16 sm:text-3xl"
-            aria-label="Start the story"
+            aria-label="Start the briefing"
           >
-            <IconPlay className="h-8 w-8" /> Start the story
+            <IconPlay className="h-8 w-8" /> Start the briefing
           </button>
 
           <button
             type="button"
             onClick={onSkipToStations}
-            className="mt-5 inline-flex items-center gap-2 font-display text-base font-bold uppercase tracking-widest text-white/60 transition-colors hover:text-white sm:text-lg"
+            className="mt-5 inline-flex items-center gap-2 font-mono text-xs font-medium uppercase tracking-[0.25em] text-white/55 transition-colors hover:text-glow sm:text-sm"
           >
-            <IconSkip className="h-5 w-5" /> Skip to the stations
+            <IconSkip className="h-5 w-5" /> Skip to the districts
           </button>
         </div>
       </div>
 
       <div className="title-footer absolute inset-x-0 bottom-0 z-20 flex items-center justify-center gap-2 bg-gradient-to-t from-navy-950 to-transparent px-3 pb-4 pt-10 text-center text-white/50">
         <IconSparkle className="hidden h-4 w-4 shrink-0 sm:block" />
-        <span className="font-display text-xs font-bold uppercase tracking-wider sm:text-sm sm:tracking-widest">
-          4 districts · 4 lessons · 1 little robot
+        <span className="font-mono text-xs font-medium uppercase tracking-wider sm:tracking-widest">
+          4 districts · 4 lessons · 1 new robot
         </span>
         <IconArrow className="hidden h-4 w-4 shrink-0 sm:block" />
       </div>

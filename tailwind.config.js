@@ -20,13 +20,24 @@ export default {
         },
         glow: '#9CC8FF',
       },
+      /* Sharper corner scale: the interface is a deployed control system, so
+         modules and controls trade the rounded, toy-like corners for clipped
+         instrument panels. `rounded-full` is left alone so pills stay pills. */
+      borderRadius: {
+        lg: '0.25rem',
+        xl: '0.375rem',
+        '2xl': '0.5rem',
+        '3xl': '0.625rem',
+      },
       fontFamily: {
-        display: ['"Baloo 2"', 'ui-rounded', '"Segoe UI"', 'system-ui', 'sans-serif'],
-        body: ['Nunito', 'ui-rounded', '"Segoe UI"', 'system-ui', 'sans-serif'],
+        display: ['Orbitron', 'ui-sans-serif', '"Segoe UI"', 'system-ui', 'sans-serif'],
+        body: ['"Exo 2"', 'ui-sans-serif', '"Segoe UI"', 'system-ui', 'sans-serif'],
+        mono: ['"JetBrains Mono"', 'ui-monospace', 'SFMono-Regular', 'monospace'],
       },
       boxShadow: {
-        'glow-white': '0 0 18px rgba(255,255,255,0.35), 0 0 40px rgba(156,200,255,0.25)',
+        'glow-white': '0 0 18px rgba(255,255,255,0.3), 0 0 40px rgba(156,200,255,0.25)',
         'glow-red': '0 0 18px rgba(239,68,68,0.5), 0 0 44px rgba(239,68,68,0.28)',
+        hud: 'inset 0 1px 0 rgba(255,255,255,0.06), 0 12px 44px rgba(0,0,0,0.5)',
       },
       keyframes: {
         'fade-in': {

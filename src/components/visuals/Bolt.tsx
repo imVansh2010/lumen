@@ -8,7 +8,10 @@ interface Props {
   className?: string
 }
 
-const PAPER = '#EDE6D6'
+/* A clean composite-shell training unit: near-white panels with navy edges,
+   a dark visor screen and a single red power core. No cardboard, no tape. */
+const SHELL = '#E8EEF6'
+const SHELL_SHADE = '#C3D2E6'
 const EDGE = '#24467F'
 const SCREEN = '#050B1A'
 
@@ -111,8 +114,8 @@ export default function Bolt({
           y="20"
           width="104"
           height="82"
-          rx="18"
-          fill={PAPER}
+          rx="14"
+          fill={SHELL}
           stroke={EDGE}
           strokeWidth="4"
         />
@@ -121,22 +124,17 @@ export default function Bolt({
           y="32"
           width="80"
           height="58"
-          rx="12"
+          rx="10"
           fill={SCREEN}
           stroke={EDGE}
           strokeWidth="3"
         />
         <LedFace mood={mood} />
-        {/* Cardboard seam + tape */}
-        <line x1="100" y1="20" x2="100" y2="34" stroke="rgba(36,70,127,0.4)" strokeWidth="2" />
-        <rect
-          x="58"
-          y="20"
-          width="16"
-          height="10"
-          fill="rgba(255,255,255,0.5)"
-          transform="rotate(-18 66 25)"
-        />
+        {/* Moulded panel seam + status indicator lights */}
+        <line x1="100" y1="20" x2="100" y2="30" stroke="rgba(36,70,127,0.35)" strokeWidth="2" />
+        <circle cx="66" cy="94" r="3" fill="#9CC8FF" />
+        <circle cx="80" cy="94" r="3" fill={EDGE} opacity="0.5" />
+        <circle cx="94" cy="94" r="3" fill={EDGE} opacity="0.5" />
 
         {/* Body */}
         <rect
@@ -144,21 +142,16 @@ export default function Bolt({
           y="112"
           width="92"
           height="86"
-          rx="16"
-          fill={PAPER}
+          rx="12"
+          fill={SHELL}
           stroke={EDGE}
           strokeWidth="4"
         />
-        <rect
-          x="58"
-          y="126"
-          width="20"
-          height="12"
-          fill="rgba(255,255,255,0.5)"
-          transform="rotate(-14 68 132)"
-        />
+        {/* intake vents */}
+        <line x1="62" y1="176" x2="84" y2="176" stroke={SHELL_SHADE} strokeWidth="4" />
+        <line x1="62" y1="184" x2="84" y2="184" stroke={SHELL_SHADE} strokeWidth="4" />
 
-        {/* Chest bolt logo */}
+        {/* Chest power core */}
         <path
           d="M104 128 l-16 24 h12 l-6 22 l20 -28 h-12 z"
           fill="#EF4444"
@@ -167,8 +160,8 @@ export default function Bolt({
 
         {/* Left arm */}
         <g stroke={EDGE} strokeWidth="4">
-          <rect x="30" y="120" width="22" height="56" rx="11" fill={PAPER} />
-          <circle cx="41" cy="182" r="10" fill={PAPER} />
+          <rect x="30" y="120" width="22" height="56" rx="11" fill={SHELL} />
+          <circle cx="41" cy="182" r="10" fill={SHELL} />
         </g>
 
         {/* Right arm (waving) */}
@@ -184,17 +177,17 @@ export default function Bolt({
             width="22"
             height="56"
             rx="11"
-            fill={PAPER}
+            fill={SHELL}
             stroke={EDGE}
             strokeWidth="4"
           />
-          <circle cx="159" cy="182" r="10" fill={PAPER} stroke={EDGE} strokeWidth="4" />
+          <circle cx="159" cy="182" r="10" fill={SHELL} stroke={EDGE} strokeWidth="4" />
         </g>
 
         {/* Legs */}
         <g stroke={EDGE} strokeWidth="4">
-          <rect x="66" y="196" width="22" height="30" rx="8" fill={PAPER} />
-          <rect x="112" y="196" width="22" height="30" rx="8" fill={PAPER} />
+          <rect x="66" y="196" width="22" height="30" rx="8" fill={SHELL} />
+          <rect x="112" y="196" width="22" height="30" rx="8" fill={SHELL} />
         </g>
       </svg>
     </div>
