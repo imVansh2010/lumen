@@ -118,8 +118,12 @@ function RoomBackdrop({ windowLit = false }: { windowLit?: boolean }) {
           hang alone in the dark, which made it look like it was floating; the
           soft shadow patch behind it anchors it to the wall. It carries live
           bay readouts rather than tool stickers, so the room reads as a
-          service bay instead of a toy workshop. */}
-      <div className="absolute left-[6%] top-[30%] w-[7.5rem] sm:w-[9.375rem]">
+          service bay instead of a toy workshop.
+          It hangs in the wall's left margin, so it only has clear space while
+          the window is wide (or tall) enough to leave a margin beside the
+          centred scene column; on smaller windows the column reaches under it.
+          `.wall-panel` drops it there — see the breakpoint in index.css. */}
+      <div className="wall-panel absolute left-[6%] top-[30%] w-[7.5rem] sm:w-[9.375rem]">
         <div className="absolute -inset-x-4 -inset-y-3 rounded-[28px] bg-navy-950/55 blur-md" />
         <div className="relative rounded-2xl border-2 border-navy-700 bg-navy-900/95 p-3 shadow-[0_18px_44px_rgba(0,0,0,0.65)]">
           <div className="hud-label mb-2 flex items-center justify-between">

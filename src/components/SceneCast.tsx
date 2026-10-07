@@ -82,7 +82,7 @@ export default function SceneCast({
 
       <div
         className={`cast-row relative flex origin-bottom items-end justify-center gap-8 px-4 sm:gap-20 ${
-          showGrid ? 'mt-10 sm:mt-12' : ''
+          showGrid ? 'board-gap mt-10 sm:mt-12' : ''
         }`}
       >
         {/* soft ground shadow keeps the characters planted on screen */}

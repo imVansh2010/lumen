@@ -84,7 +84,7 @@ function Briefing({
         {stationName}
       </h2>
 
-      <div className="mt-5 flex flex-col items-center gap-4 rounded-3xl border-2 border-white/10 bg-navy-900/70 p-5 sm:flex-row sm:p-6">
+      <div className="mt-6 flex flex-col items-center gap-4 rounded-3xl border-2 border-white/10 bg-navy-900/70 p-5 sm:flex-row sm:p-6">
         <EchoOrb mood="worried" size="5.75rem" />
         <p className="text-center text-lg text-white/85 sm:text-left">
           “Everything I learned today is a mess. Teach Bolt with examples you&apos;ve checked, and
@@ -93,7 +93,7 @@ function Briefing({
       </div>
 
       {/* the parts, hardest last */}
-      <div className="mt-5 space-y-3 sm:space-y-4">
+      <div className="mt-6 space-y-3 sm:space-y-5">
         {parts.map((part, i) => {
           const done = i < doneParts
           return (
@@ -132,14 +132,14 @@ function Briefing({
         })}
       </div>
 
-      <div className="panel mt-5 p-4 sm:p-5">
+      <div className="panel mt-6 p-4 sm:p-5">
         <p className="text-white/85">
           <span className="font-display font-bold text-white">Scoring:</span> up to {STARS_PER_TASK}{' '}
           stars a task. First try earns all three, and each finished part lights one more light.
         </p>
       </div>
 
-      <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+      <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
         <button type="button" onClick={onStart} className="btn btn-primary gap-2 px-8 py-4 text-xl">
           {allDone ? <IconReplay className="h-6 w-6" /> : <IconSparkle className="h-6 w-6" />}
           {allDone
@@ -189,7 +189,7 @@ function LabelChip({ text, wrong }: { text: string; wrong?: boolean }) {
 function ItemCard({ task }: { task: Task }) {
   return (
     <div
-      className="rounded-3xl border-2 border-white/15 bg-navy-900/80 p-5 text-center"
+      className="rounded-3xl border-2 border-white/15 bg-navy-900/80 p-5 text-center sm:p-6"
       style={{ animation: 'belt-drop 0.45s cubic-bezier(0.16, 1, 0.3, 1) both' }}
     >
       <div className="relative mx-auto inline-flex flex-col items-center rounded-2xl border border-glow/25 bg-navy-950/60 px-5 py-1.5">
@@ -205,10 +205,10 @@ function ItemCard({ task }: { task: Task }) {
           <span className="text-7xl leading-none">{task.emoji}</span>
         )}
       </div>
-      <p className="mt-1.5 font-mono text-[0.5625rem] uppercase tracking-[0.22em] text-glow/60">
+      <p className="mt-2 font-mono text-[0.5625rem] uppercase tracking-[0.22em] text-glow/60">
         {task.kind === 'cleanSet' ? 'dataset · unverified' : `sample ${task.id} · unverified`}
       </p>
-      <div className="mt-3 flex flex-col items-center gap-2">
+      <div className="mt-3.5 flex flex-col items-center gap-2.5">
         {task.kind === 'fixLabel' && <LabelChip text={task.badLabel} wrong />}
         {task.kind === 'sortCrate' && <LabelChip text={task.label} />}
         {task.kind === 'cleanSet' && (
@@ -236,7 +236,7 @@ function ItemCard({ task }: { task: Task }) {
 
 function ConveyorBelt() {
   return (
-    <div className="relative mt-3 h-6 overflow-hidden rounded-full border-2 border-white/10 bg-navy-800">
+    <div className="relative mt-4 h-6 overflow-hidden rounded-full border-2 border-white/10 bg-navy-800">
       <div
         className="absolute inset-y-0 left-0 w-[140%]"
         style={{ animation: 'belt-scroll 1.2s linear infinite' }}
@@ -590,7 +590,7 @@ export default function StationPlayer({ stationId, progress, onBack, onSectionCo
   return (
     <div className="scanlines flex min-h-full w-full flex-col px-4 py-6 sm:px-8">
       <div className="m-auto w-full max-w-5xl">
-        <div className="mb-4 flex items-center justify-between gap-3">
+        <div className="mb-5 flex items-center justify-between gap-3 sm:mb-7">
           <button
             type="button"
             onClick={onBack}
@@ -626,7 +626,7 @@ export default function StationPlayer({ stationId, progress, onBack, onSectionCo
               ))}
             </span>
           </div>
-          <div className="mt-2 h-3 overflow-hidden rounded-full border-2 border-white/10 bg-navy-900">
+          <div className="mt-3 h-3 overflow-hidden rounded-full border-2 border-white/10 bg-navy-900">
             <div
               className="h-full rounded-full bg-gradient-to-r from-glow to-white transition-all duration-500"
               style={{ width: `${((taskIndex + (solved ? 1 : 0)) / taskCount) * 100}%` }}
@@ -634,7 +634,7 @@ export default function StationPlayer({ stationId, progress, onBack, onSectionCo
           </div>
 
           {/* picture + Bolt */}
-          <div className="mt-5 flex items-end gap-3 sm:gap-5">
+          <div className="mt-7 flex items-end gap-3 sm:mt-9 sm:gap-6">
             <div className="hidden shrink-0 flex-col items-center sm:flex">
               <span className="mb-2 max-w-[9rem] rounded-2xl border-2 border-white/15 bg-navy-900/80 px-3 py-2 text-center text-sm font-semibold text-white/85">
                 {boltLine}
@@ -648,13 +648,13 @@ export default function StationPlayer({ stationId, progress, onBack, onSectionCo
             </div>
           </div>
 
-          <p className="mt-5 text-center font-display text-xl font-bold text-white sm:text-2xl">
+          <p className="mt-7 text-center font-display text-xl font-bold text-white sm:mt-9 sm:text-2xl">
             {promptFor(task)}
           </p>
 
           {/* choices */}
           {(task.kind === 'fixLabel' || task.kind === 'judgeClaim') && (
-            <div key={attempt} className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <div key={attempt} className="mt-6 grid gap-3 sm:mt-7 sm:gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {task.options.map((o) => {
                 const isWrong = wrongIds.includes(o)
                 const isRight = solved && o === task.answer
@@ -665,7 +665,7 @@ export default function StationPlayer({ stationId, progress, onBack, onSectionCo
                     disabled={solved}
                     onClick={() => pickOption(o)}
                     aria-label={o}
-                    className={`btn font-body min-h-[4.5rem] px-4 py-4 text-base sm:text-lg ${
+                    className={`btn font-body min-h-[5rem] px-5 py-4 text-base sm:text-lg ${
                       isRight
                         ? 'border-2 border-white bg-white text-navy-950'
                         : isWrong
@@ -682,7 +682,7 @@ export default function StationPlayer({ stationId, progress, onBack, onSectionCo
           )}
 
           {task.kind === 'sortCrate' && (
-            <div key={attempt} className="mt-4 grid gap-3 sm:grid-cols-2">
+            <div key={attempt} className="mt-6 grid gap-3 sm:mt-7 sm:gap-4 sm:grid-cols-2">
               {task.crates.map((crate, i) => {
                 const isWrong = wrongIds.includes(`crate-${i}`)
                 const isRight = solved && i === task.correctCrate
@@ -715,7 +715,7 @@ export default function StationPlayer({ stationId, progress, onBack, onSectionCo
 
           {task.kind === 'cleanSet' && (
             <>
-              <div className="mt-4">
+              <div className="mt-6 sm:mt-7">
                 <SetTiles
                   task={task}
                   selected={selected}
@@ -724,13 +724,13 @@ export default function StationPlayer({ stationId, progress, onBack, onSectionCo
                   onToggle={toggleTile}
                 />
               </div>
-              <p className="mt-2 text-center text-sm text-white/60">
+              <p className="mt-3 text-center text-sm text-white/60">
                 {solved
                   ? `Found all ${task.oddOnes.length} of them.`
                   : `${selected.length} picked. Press Check when you're ready.`}
               </p>
               {!solved && (
-                <div className="mt-3 flex justify-center">
+                <div className="mt-4 flex justify-center">
                   <button
                     type="button"
                     onClick={checkSet}
@@ -744,7 +744,7 @@ export default function StationPlayer({ stationId, progress, onBack, onSectionCo
           )}
 
           {/* feedback */}
-          <div className="mt-4 min-h-[7.5rem]" aria-live="polite">
+          <div className="mt-6 min-h-[7.5rem] sm:mt-7" aria-live="polite">
             {solved ? (
               <div className="animate-pop-in rounded-3xl border-2 border-white bg-white/10 p-4 shadow-glow-white sm:p-5">
                 <div className="flex items-center gap-2">
@@ -787,7 +787,7 @@ export default function StationPlayer({ stationId, progress, onBack, onSectionCo
           </div>
 
           {/* Bolt reaction on small screens */}
-          <div className="mt-4 flex flex-col items-center gap-2 sm:hidden">
+          <div className="mt-6 flex flex-col items-center gap-2 sm:hidden">
             <span className="max-w-xs rounded-2xl border-2 border-white/15 bg-navy-900/80 px-3 py-2 text-center text-sm font-semibold text-white/85">
               {boltLine}
             </span>

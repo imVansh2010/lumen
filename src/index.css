@@ -283,6 +283,25 @@
    conversation keeps its place without stealing the scene's. The location
    chip's negative offsets are tuned to the full-height layout, so the stage
    padding is left alone. */
+/* Short windows: the top-anchored scenes (the four-district board, and the
+   blackout that follows it) stack the location chip, the board and the cast in
+   one column. That column is a fixed height — every piece keeps its rem size —
+   so below roughly 455px of window it outgrows the space left above the
+   dialogue band and the cast slid down underneath the dialogue box. Pull the
+   column's top padding and its board→cast gap in on short windows so the cast
+   stays clear of the band. The 2rem of top padding is deliberate: the chip
+   rides at a negative offset of 1.5rem, so anything less would push it off the
+   top edge. Doubled classes because Tailwind emits the `sm:` variants after
+   this file's own rules (see `.story-band` below). */
+@media (max-height: 500px) {
+  .stage-column.stage-column {
+    padding-top: 2rem;
+  }
+  .board-gap.board-gap {
+    margin-top: 0.5rem;
+  }
+}
+
 @media (max-height: 620px) {
   /* Doubled class: Tailwind emits the `sm:gap-6`/`sm:pb-6` variants after this
      file's own rules, so a plain `.story-band` would tie on specificity and
@@ -348,6 +367,22 @@
     top: 12%;
     width: 13.125rem;
     height: 13.125rem;
+  }
+}
+
+/* ---- Repair-bay wall diagnostic panel ----------------------------------
+   The panel hangs flat on the wall at left 6%, so it only has clear wall while
+   the window leaves a margin beside the centred scene column (the location
+   chip, the district board and the cast). Below that the column reaches out
+   under the panel and it lands on top of the first district card — and on tall
+   narrow phones it lands on the cast instead. The panel is dressing, so it
+   steps aside rather than fight the scene; the room still reads as a room.
+   The two thresholds are the measured edges of that overlap: a window at least
+   900px wide always leaves the margin, and a medium window (down to 700px)
+   leaves it once it is at least 580px tall. */
+@media (max-width: 699px), (max-width: 899px) and (max-height: 579px) {
+  .wall-panel {
+    display: none;
   }
 }
 

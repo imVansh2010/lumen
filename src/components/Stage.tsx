@@ -143,7 +143,7 @@ export default function Stage({
           reference root) so it keeps tracking the band as the global scale
           shrinks both together. */}
       <div
-        className={`relative z-20 flex min-h-0 flex-1 justify-center px-4 pt-20 sm:pt-24 ${
+        className={`stage-column relative z-20 flex min-h-0 flex-1 justify-center px-4 pt-20 sm:pt-24 ${
           floorScene
             ? 'items-end pb-[clamp(3.5rem,calc(50vh_-_16.5rem),40rem)]'
             : 'items-start pb-4'
